@@ -6,7 +6,7 @@
 
 #### 1. Request-Response
 
-* Client sendet Anfrage -> Server Antwortet
+* Client sendet Anfrage -> Server antwortet
 * Client kann nicht aktiv vom Server benachrichtigt werden
 * Implementierung vergleichsweise einfach
 * Client kann Nachrichten nur auf Anfrage empfangen
@@ -33,7 +33,7 @@ Beispiel:
 #### 2. Request-Response erweitert durch Events
 
 * grundsätzlich gleiches Prinzip
-* Server kann zusätzlich unabhängig vom Client nachrichten mit bestimmtem Prefix senden, der die nachricht als event kennzeichnet
+* Server kann zusätzlich unabhängig vom Client Nachrichten mit bestimmtem Prefix senden, der die Nachricht als Event kennzeichnet
 * Events können vom Client ignoriert werden
 * Funktionen wie "typing indicator" lassen sich so implementieren
 * Nachrichten können sowohl auf Anfrage vom Server geholt werden als auch aktiv vom Server übermittelt werden
