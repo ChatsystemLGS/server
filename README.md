@@ -5,13 +5,15 @@
 ### Designentscheidungen
 
 #### 1. Request-Response
+
 * Client sendet Anfrage -> Server Antwortet
 * Client kann nicht aktiv vom Server benachrichtigt werden
 * Implementierung vergleichsweise einfach
 * Client kann Nachrichten nur auf Anfrage empfangen
 
 Beispiel:
-```
+
+```html
 > SENDMESSAGE <channelID> <data> <dataType>
 < +OK
 > GETMESSAGES <channelID> <beginTime> <endTime>
@@ -29,6 +31,7 @@ Beispiel:
 ```
 
 #### 2. Request-Response erweitert durch Events
+
 * grundsätzlich gleiches Prinzip
 * Server kann zusätzlich unabhängig vom Client nachrichten mit bestimmtem Prefix senden, der die nachricht als event kennzeichnet
 * Events können vom Client ignoriert werden
@@ -36,7 +39,8 @@ Beispiel:
 * Nachrichten können sowohl auf Anfrage vom Server geholt werden als auch aktiv vom Server übermittelt werden
 
 Beispiel:
-```
+
+```html
 > SENDMESSAGE <channelID> <data> <dataType>
 < +OK
 < EVENT:MESSAGE <channelID> <data> <dataType> <timestamp>
@@ -50,12 +54,14 @@ Beispiel:
 ```
 
 #### 3. Zwei parallele Socketverbindungen
+
 * erste Verbidung arbeitet nach Request-Response-Prinzip
 * zweite Verbindung ist unidirektional und streamt neu eintreffende Nachrichten an Client
 * ggf. kein Vorteil gegenüber [2.](#2.-request-response-erweitert-durch-events)
 
 Beispiel:
-```
+
+```html
 Connection 1:
 > SENDMESSAGE <channelID> <data> <dataType>
 < +OK
