@@ -13,21 +13,21 @@
 
 Beispiel:
 
-```html
-> SENDMESSAGE <channelID> <data> <dataType>
+```clojure
+> SENDMESSAGE [channelID] [data] [dataType]
 < +OK
-> GETMESSAGES <channelID> <beginTime> <endTime>
+> GETMESSAGES [channelID] [beginTime] [endTime]
 < +OK 3
-< <data> <dataType> <timestamp>
-< <data> <dataType> <timestamp>
-< <data> <dataType> <timestamp>
+< [data] [dataType] [timestamp]
+< [data] [dataType] [timestamp]
+< [data] [dataType] [timestamp]
 > GETMESSAGES
 < +OK 1
-< <channelID> <data> <dataType> <timestamp>
+< [channelID] [data] [dataType] [timestamp]
 > GETMESSAGES
 < +OK 2
-< <channelID> <data> <dataType> <timestamp>
-< <channelID> <data> <dataType> <timestamp>
+< [channelID] [data] [dataType] [timestamp]
+< [channelID] [data] [dataType] [timestamp]
 ```
 
 #### 2. Request-Response erweitert durch Events
@@ -40,17 +40,17 @@ Beispiel:
 
 Beispiel:
 
-```html
-> SENDMESSAGE <channelID> <data> <dataType>
+```clojure
+> SENDMESSAGE [channelID] [data] [dataType]
 < +OK
-< EVENT:MESSAGE <channelID> <data> <dataType> <timestamp>
-< EVENT:ISTYPING <channelID> <userID>
-< EVENT:MESSAGE <channelID> <data> <dataType> <timestamp>
-> GETMESSAGES <channelID> <beginTime> <endTime>
+< EVENT:MESSAGE [channelID] [data] [dataType] [timestamp]
+< EVENT:ISTYPING [channelID] [userID]
+< EVENT:MESSAGE [channelID] [data] [dataType] [timestamp]
+> GETMESSAGES [channelID] [beginTime] [endTime]
 < +OK 3
-< <data> <dataType> <timestamp>
-< <data> <dataType> <timestamp>
-< <data> <dataType> <timestamp>
+< [data] [dataType] [timestamp]
+< [data] [dataType] [timestamp]
+< [data] [dataType] [timestamp]
 ```
 
 #### 3. Zwei parallele Socketverbindungen
@@ -61,18 +61,18 @@ Beispiel:
 
 Beispiel:
 
-```html
+```clojure
 Connection 1:
-> SENDMESSAGE <channelID> <data> <dataType>
+> SENDMESSAGE [channelID] [data] [dataType]
 < +OK
-> GETMESSAGES <channelID> <beginTime> <endTime>
+> GETMESSAGES [channelID] [beginTime] [endTime]
 < +OK 3
-< <data> <dataType> <timestamp>
-< <data> <dataType> <timestamp>
-< <data> <dataType> <timestamp>
+< [data] [dataType] [timestamp]
+< [data] [dataType] [timestamp]
+< [data] [dataType] [timestamp]
 
 Connection 2
-> ISTYPING <channelID> <userID>
-> MESSAGE <channelID> <data> <dataType> <timestamp>
-> ISTYPING <channelID> <userID>
+> ISTYPING [channelID] [userID]
+> MESSAGE [channelID] [data] [dataType] [timestamp]
+> ISTYPING [channelID] [userID]
 ```
