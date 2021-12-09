@@ -13,7 +13,7 @@
 
 Beispiel:
 
-```clojure
+```text
 > SENDMESSAGE [channelID] [data] [dataType]
 < +OK
 > GETMESSAGES [channelID] [beginTime] [endTime]
@@ -40,7 +40,7 @@ Beispiel:
 
 Beispiel:
 
-```clojure
+```text
 > SENDMESSAGE [channelID] [data] [dataType]
 < +OK
 < EVENT:MESSAGE [channelID] [data] [dataType] [timestamp]
@@ -61,7 +61,7 @@ Beispiel:
 
 Beispiel:
 
-```clojure
+```text
 Connection 1:
 > SENDMESSAGE [channelID] [data] [dataType]
 < +OK
@@ -71,7 +71,7 @@ Connection 1:
 < [data] [dataType] [timestamp]
 < [data] [dataType] [timestamp]
 
-Connection 2
+Connection 2:
 > ISTYPING [channelID] [userID]
 > MESSAGE [channelID] [data] [dataType] [timestamp]
 > ISTYPING [channelID] [userID]
