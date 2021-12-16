@@ -13,7 +13,7 @@ public class ClientHandler implements Runnable {
 	
 	Session session;
 	
-	private ClientHandler(Socket client, Server server) throws IOException {
+	private ClientHandler(Socket client, App server) throws IOException {
 		this.client = client;
 		
 		s = new Scanner(client.getInputStream());
@@ -28,7 +28,7 @@ public class ClientHandler implements Runnable {
 		
 	}
 
-	public static void createThread(Socket client, Server server) throws IOException {
+	public static void createThread(Socket client, App server) throws IOException {
 		new Thread(new ClientHandler(client, server)).start();
 	}
 

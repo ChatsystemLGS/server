@@ -2,7 +2,7 @@ package server;
 
 public class Session {
 
-	public Session(Server server) {
+	public Session(App server) {
 		
 	}
 

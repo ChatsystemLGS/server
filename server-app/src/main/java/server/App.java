@@ -9,18 +9,18 @@ import java.net.ServerSocket;
 import server.config.Config;
 import server.db.DatabaseConnector;
 
-public class Server {
+public class App {
 
 	public final Config cfg;
 	public final DatabaseConnector dbc;
 	
 	public static void main(String[] args) {
 
-		new Server(Config.createFromArgs(args, Config.DEFAULT_CONFIG));
+		new App(Config.createFromArgs(args, Config.DEFAULT_CONFIG));
 
 	}
 
-	private Server(Config cfg) {
+	private App(Config cfg) {
 
 		this.cfg = cfg;
 		dbc = new DatabaseConnector(cfg.DB_HOST, cfg.DB_PORT);
