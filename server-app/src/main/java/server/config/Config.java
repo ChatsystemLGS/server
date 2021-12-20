@@ -29,7 +29,7 @@ public class Config {
 		int dbPort;
 
 		try {
-			port = parameters.getInteger("port", defaultValues.DB_PORT);
+			port = parameters.getInteger("port", defaultValues.PORT);
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException();
 		}
@@ -37,7 +37,7 @@ public class Config {
 		dbHost = parameters.getString("dbHost", defaultValues.DB_HOST);
 
 		try {
-			dbPort = parameters.getInteger("port", defaultValues.DB_PORT);
+			dbPort = parameters.getInteger("dbPort", defaultValues.DB_PORT);
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException();
 		}
