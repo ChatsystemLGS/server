@@ -3,6 +3,8 @@ package server.protocol;
 import server.protocol.exceptions.ProtocolException.*;
 
 public interface Protocol {
+	
+	static final String PROTOCOL_VERSION = "0.0.0";
 
 	void register(String email, String password) throws EmailAlreadyRegisteredException, PasswordRequirementNotMet;
 
@@ -49,7 +51,8 @@ public interface Protocol {
 		GETFRIENDS,
 		SENDMESSAGE,
 		SENDDM,
-		RECEIVEMESSAGES
+		RECEIVEMESSAGES,
+		QUIT
 		
 	}
 	
