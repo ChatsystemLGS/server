@@ -21,43 +21,86 @@ public class Session implements Protocol {
 	}
 
 	public String execute(String line) {
-		
+
 		System.out.println(line);
 
 		if (line.length() > server.CFG.MAX_MESSAGE_LENGTH)
 			return response(Status.MESSAGE_TOO_LONG);
 
-		String[] cmd = line.split(" ");
+		String[] args = line.split(" ");
 
-		if (cmd.length == 0)
+		Command cmd;
+		try {
+			cmd = Command.valueOf(args[0]);
+		} catch (IllegalArgumentException e) {
 			return response(Status.COMMAND_NOT_FOUND);
+		}
 
 		try {
-			switch (cmd[0]) {
-			case "REGISTER": {
-
+			return switch (cmd) {
+			case ADDFRIEND -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
+			}
+			case GETCHANNELMEMBERS -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
+			}
+			case GETCHANNELS -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
+			}
+			case GETFRIENDS -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
+			}
+			case GETPUBLICGROUPS -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
+			}
+			case GETUSER -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
+			}
+			case JOINGROUP -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
+			}
+			case LOGIN -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
+			}
+			case QUIT -> {
+				quit();
+				yield response(Status.OK);
+			}
+			case RECEIVEMESSAGES -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
+			}
+			case REGISTER -> {
 				Status status = Status.OK;
 
 				try {
-					register(cmd[1], cmd[2]);
+					register(args[1], args[2]);
 				} catch (ProtocolException e) {
 					status = e.getStatus();
 				}
-
-				return response(status);
+				yield response(status);
 			}
-			// TODO
-			case "QUIT": {
-				quit();
-				return response(Status.OK);
+			case SENDDM -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
 			}
-
+			case SENDMESSAGE -> {
+				// TODO
+				yield "NOT YET IMPLEMENTED";
 			}
+			};
 		} catch (ArrayIndexOutOfBoundsException e) {
 			return response(Status.NOT_ENOUGH_PARAMETERS);
 		}
 
-		return response(Status.COMMAND_NOT_FOUND);
 	}
 
 	String response(Status status, Object... retVal) {
@@ -142,7 +185,7 @@ public class Session implements Protocol {
 	}
 
 	public String greet() {
-		return "Hello";
+		return response(Status.OK, PROTOCOL_VERSION);
 	}
 
 }
