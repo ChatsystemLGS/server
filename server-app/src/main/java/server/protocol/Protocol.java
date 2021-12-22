@@ -2,33 +2,33 @@ package server.protocol;
 
 import java.util.Date;
 
-import server.protocol.exceptions.ProtocolException.*;
+import server.protocol.exceptions.ProtocolException;
 
 public interface Protocol {
 	
 	static final String PROTOCOL_VERSION = "0.0.0";
 
-	void register(String email, String password) throws EmailAlreadyRegisteredException, PasswordRequirementNotMet;
+	void register(String email, String password) throws ProtocolException;
 
-	void login(String email, String password);
+	void login(String email, String password) throws ProtocolException;
 
-	Channel[] getPublicGroups(String email, String password);
+	Channel[] getPublicGroups(String email, String password) throws ProtocolException;
 
-	void joinGroup(String email, String password);
+	void joinGroup(String email, String password) throws ProtocolException;
 
-	Channel[] getChannels(String email, String password);
+	Channel[] getChannels(String email, String password) throws ProtocolException;
 
-	User[] getChannelMembers(String email, String password);
+	User[] getChannelMembers(String email, String password) throws ProtocolException;
 
-	User getUser(String email, String password);
+	User getUser(String email, String password) throws ProtocolException;
 	
-	void addFriend(String email);
+	void addFriend(String email) throws ProtocolException;
 	
-	User[] getFriends(int channelID, Byte[] data, DataType dataType);
+	User[] getFriends(int channelID, Byte[] data, DataType dataType) throws ProtocolException;
 	
-	void sendMessage(int channelID, Byte[] data, DataType dataType);
+	void sendMessage(int channelID, Byte[] data, DataType dataType) throws ProtocolException;
 	
-	Message[] receiveMessages(int channelID, Date tFrom, Date tUntil);
+	Message[] receiveMessages(int channelID, Date tFrom, Date tUntil) throws ProtocolException;
 	
 	void quit();
 
