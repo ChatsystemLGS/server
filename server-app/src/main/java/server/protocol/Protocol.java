@@ -12,19 +12,19 @@ public interface Protocol {
 
 	void login(String email, String password) throws ProtocolException;
 
-	Channel[] getPublicGroups(String email, String password) throws ProtocolException;
+	Channel[] getPublicGroups();
 
-	void joinGroup(String email, String password) throws ProtocolException;
+	void joinGroup(int channelID) throws ProtocolException;
 
-	Channel[] getChannels(String email, String password) throws ProtocolException;
+	Channel[] getChannels();
 
-	User[] getChannelMembers(String email, String password) throws ProtocolException;
+	User[] getChannelMembers(int channelID) throws ProtocolException;
 
-	User getUser(String email, String password) throws ProtocolException;
+	User getUser(String email) throws ProtocolException;
 	
 	void addFriend(String email) throws ProtocolException;
 	
-	User[] getFriends(int channelID, Byte[] data, DataType dataType) throws ProtocolException;
+	User[] getFriends(int channelID, Byte[] data, DataType dataType);
 	
 	void sendMessage(int channelID, Byte[] data, DataType dataType) throws ProtocolException;
 	

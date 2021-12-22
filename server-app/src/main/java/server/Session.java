@@ -1,13 +1,13 @@
 package server;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import server.protocol.Channel;
 import server.protocol.Message;
 import server.protocol.Protocol;
 import server.protocol.User;
 import server.protocol.exceptions.ProtocolException;
-import server.protocol.exceptions.ProtocolException.EmailAlreadyRegisteredException;
 
 public class Session implements Protocol {
 
@@ -39,8 +39,13 @@ public class Session implements Protocol {
 		try {
 			return switch (cmd) {
 			case ADDFRIEND -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				Status status = Status.OK;
+				try {
+					addFriend(args[1]);
+				} catch (ProtocolException e) {
+					status = e.getStatus();
+				}
+				yield response(status);
 			}
 			case GETCHANNELMEMBERS -> {
 				// TODO
@@ -116,65 +121,66 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public void register(String email, String password) throws EmailAlreadyRegisteredException {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void login(String email, String password) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public Channel[] getPublicGroups(String email, String password) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void joinGroup(String email, String password) {
+	public void register(String email, String password) throws ProtocolException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Channel[] getChannels(String email, String password) {
+	public void login(String email, String password) throws ProtocolException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Channel[] getPublicGroups() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public User[] getChannelMembers(String email, String password) {
+	public void joinGroup(int channelID) throws ProtocolException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Channel[] getChannels() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public User getUser(String email, String password) {
+	public User[] getChannelMembers(int channelID) throws ProtocolException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void addFriend() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public User[] getFriends() {
+	public User getUser(String email) throws ProtocolException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void sendMessage() {
+	public void addFriend(String email) throws ProtocolException {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public User[] getFriends(int channelID, Byte[] data, DataType dataType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void sendMessage(int channelID, Byte[] data, DataType dataType) throws ProtocolException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Message[] receiveMessages() {
+	public Message[] receiveMessages(int channelID, Date tFrom, Date tUntil) throws ProtocolException {
 		// TODO Auto-generated method stub
 		return null;
 	}
