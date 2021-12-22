@@ -1,5 +1,7 @@
 package server.protocol;
 
+import java.util.Date;
+
 import server.protocol.exceptions.ProtocolException.*;
 
 public interface Protocol {
@@ -20,13 +22,13 @@ public interface Protocol {
 
 	User getUser(String email, String password);
 	
-	void addFriend();
+	void addFriend(String email);
 	
-	User[] getFriends();
+	User[] getFriends(int channelID, Byte[] data, DataType dataType);
 	
-	void sendMessage();
+	void sendMessage(int channelID, Byte[] data, DataType dataType);
 	
-	Message[] receiveMessages();
+	Message[] receiveMessages(int channelID, Date tFrom, Date tUntil);
 	
 	void quit();
 
@@ -77,6 +79,16 @@ public interface Protocol {
 		public String toString() {
 			return this.name();
 		}
+	}
+	
+	enum DataType {
+		
+		TEXT,
+		FILE_TXT,
+		FILE_PNG,
+		FILE_GIF,
+		FILE_PDF
+		
 	}
 	
 }
