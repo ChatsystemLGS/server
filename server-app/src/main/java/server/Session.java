@@ -1,7 +1,7 @@
 package server;
 
+import java.sql.Date;
 import java.util.Arrays;
-import java.util.Date;
 
 import server.protocol.Channel;
 import server.protocol.Message;
@@ -39,77 +39,106 @@ public class Session implements Protocol {
 		try {
 			return switch (cmd) {
 			case ADDFRIEND -> {
-				Status status = Status.OK;
-				try {
-					addFriend(args[1]);
-				} catch (ProtocolException e) {
-					status = e.getStatus();
-				}
-				yield response(status);
+				addFriend(args[1]);
+				yield response(Status.OK);
 			}
 			case GETCHANNELMEMBERS -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				User[] users = getChannelMembers(Integer.parseInt(args[1]));
+				yield response(users);
 			}
 			case GETCHANNELS -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				Channel[] channels = getChannels();
+				yield response(channels);
 			}
 			case GETFRIENDS -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				User[] users = getFriends();
+				yield response(users);
 			}
 			case GETPUBLICGROUPS -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				Channel[] channels = getPublicGroups();
+				yield response(channels);
 			}
 			case GETUSER -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				User user = getUser(args[1]);
+				yield response(user);
 			}
 			case JOINGROUP -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				joinGroup(Integer.parseInt(args[1]));
+				yield response();
 			}
 			case LOGIN -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				login(args[1], args[2]);
+				yield response();
 			}
 			case QUIT -> {
 				quit();
 				yield response(Status.OK);
 			}
 			case RECEIVEMESSAGES -> {
+
+				// handle IllegalArgumetException
+//				Date tFrom = Date.valueOf(args[2]);
+//				Date tUntil = Date.valueOf(args[3]);
+//
+//				Message[] messages;
+//
+//				try {
+//					messages = receiveMessages(Integer.parseInt(args[1]), tFrom, tUntil);
+//				} catch (ProtocolException e) {
+//					Status status = e.getStatus();
+//					if (status == Status.TOO_MANY_MESSAGES) {
+//						response(status, messages);
+//					}
+//				}
+//				yield response(messages);
 				// TODO
 				yield "NOT YET IMPLEMENTED";
 			}
 			case REGISTER -> {
-				Status status = Status.OK;
-
-				try {
-					register(args[1], args[2]);
-				} catch (ProtocolException e) {
-					status = e.getStatus();
-				}
-				yield response(status);
+				register(args[1], args[2]);
+				yield response();
 			}
 			case SENDDM -> {
 				// TODO
 				yield "NOT YET IMPLEMENTED";
 			}
 			case SENDMESSAGE -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				sendMessage(Integer.parseInt(args[1]), args[2], DataType.valueOf(args[3]));
+				yield response();
 			}
 			};
 		} catch (ArrayIndexOutOfBoundsException e) {
 			return response(Status.NOT_ENOUGH_PARAMETERS);
+		} catch (ProtocolException e) {
+			return response(e.getStatus());
+		} catch (NumberFormatException e) {
+			return response(Status.INVALID_PARAMETER);
 		}
 
 	}
 
-	String response(Status status, Object... retVal) {
+	String response(Status status) {
+		return String.format("%s", status);
+	}
+
+	String response() {
+		return response(Status.OK);
+	}
+
+	String response(Status status, Object retVal) {
+		return String.format("%s %s", status, retVal);
+	}
+
+	String response(Status status, Object[] retVal) {
 		return String.format("%s %s", status, Arrays.toString(retVal));
+	}
+
+	String response(Object retVal) {
+		return response(Status.OK, retVal);
+	}
+
+	String response(Object[] retVal) {
+		return response(Status.OK, retVal);
 	}
 
 	public void disconnect() {
@@ -168,13 +197,13 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public User[] getFriends(int channelID, Byte[] data, DataType dataType) {
+	public User[] getFriends() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void sendMessage(int channelID, Byte[] data, DataType dataType) throws ProtocolException {
+	public void sendMessage(int channelID, String data, DataType dataType) throws ProtocolException {
 		// TODO Auto-generated method stub
 
 	}

@@ -1,6 +1,6 @@
 package server.protocol;
 
-import java.util.Date;
+import java.sql.Date;
 
 import server.protocol.exceptions.ProtocolException;
 
@@ -24,9 +24,9 @@ public interface Protocol {
 	
 	void addFriend(String email) throws ProtocolException;
 	
-	User[] getFriends(int channelID, Byte[] data, DataType dataType);
+	User[] getFriends();
 	
-	void sendMessage(int channelID, Byte[] data, DataType dataType) throws ProtocolException;
+	void sendMessage(int channelID, String data, DataType dataType) throws ProtocolException;
 	
 	Message[] receiveMessages(int channelID, Date tFrom, Date tUntil) throws ProtocolException;
 	
@@ -64,6 +64,7 @@ public interface Protocol {
 		OK,
 		NOT_ENOUGH_PARAMETERS,
 		TOO_MANY_PARAMETERS,
+		INVALID_PARAMETER,
 		EMAIL_ALREADY_REGISTERED,
 		PASSWORD_REQ_NOT_MET,
 		EMAIL_NOT_REGISTERED,
