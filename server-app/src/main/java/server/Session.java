@@ -1,6 +1,7 @@
 package server;
 
 import java.sql.Date;
+
 import java.util.Arrays;
 
 import server.protocol.Channel;
@@ -8,6 +9,14 @@ import server.protocol.Message;
 import server.protocol.Protocol;
 import server.protocol.User;
 import server.protocol.exceptions.ProtocolException;
+import server.protocol.exceptions.ProtocolException.ChannelNotFoundException;
+import server.protocol.exceptions.ProtocolException.EmailAlreadyRegisteredException;
+import server.protocol.exceptions.ProtocolException.EmailNotRegisteredException;
+import server.protocol.exceptions.ProtocolException.MessageTooLongException;
+import server.protocol.exceptions.ProtocolException.NotMemberOfChannelException;
+import server.protocol.exceptions.ProtocolException.PasswordInvalidException;
+import server.protocol.exceptions.ProtocolException.PasswordRequirementNotMetException;
+import server.protocol.exceptions.ProtocolException.TooManyMessagesException;
 
 public class Session implements Protocol {
 
@@ -150,13 +159,14 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public void register(String email, String password) throws ProtocolException {
+	public void register(String email, String password)
+			throws EmailAlreadyRegisteredException, PasswordRequirementNotMetException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void login(String email, String password) throws ProtocolException {
+	public void login(String email, String password) throws EmailNotRegisteredException, PasswordInvalidException {
 		// TODO Auto-generated method stub
 
 	}
@@ -168,7 +178,7 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public void joinGroup(int channelID) throws ProtocolException {
+	public void joinGroup(int channelID) throws ChannelNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
@@ -180,20 +190,21 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public User[] getChannelMembers(int channelID) throws ProtocolException {
+	public User[] getChannelMembers(int channelID) throws NotMemberOfChannelException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public User getUser(String email) throws ProtocolException {
+	public User getUser(String email) throws EmailNotRegisteredException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void addFriend(String email) throws ProtocolException {
+	public void addFriend(String email) throws EmailNotRegisteredException {
 		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -203,13 +214,15 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public void sendMessage(int channelID, String data, DataType dataType) throws ProtocolException {
+	public void sendMessage(int channelID, String data, DataType dataType)
+			throws EmailNotRegisteredException, MessageTooLongException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Message[] receiveMessages(int channelID, Date tFrom, Date tUntil) throws ProtocolException {
+	public Message[] receiveMessages(int channelID, Date tFrom, Date tUntil)
+			throws NotMemberOfChannelException, TooManyMessagesException {
 		// TODO Auto-generated method stub
 		return null;
 	}

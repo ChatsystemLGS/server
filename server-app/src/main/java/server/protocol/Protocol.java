@@ -2,33 +2,40 @@ package server.protocol;
 
 import java.sql.Date;
 
-import server.protocol.exceptions.ProtocolException;
+import server.protocol.exceptions.ProtocolException.ChannelNotFoundException;
+import server.protocol.exceptions.ProtocolException.EmailAlreadyRegisteredException;
+import server.protocol.exceptions.ProtocolException.EmailNotRegisteredException;
+import server.protocol.exceptions.ProtocolException.MessageTooLongException;
+import server.protocol.exceptions.ProtocolException.NotMemberOfChannelException;
+import server.protocol.exceptions.ProtocolException.PasswordInvalidException;
+import server.protocol.exceptions.ProtocolException.PasswordRequirementNotMetException;
+import server.protocol.exceptions.ProtocolException.TooManyMessagesException;
 
 public interface Protocol {
 	
 	static final String PROTOCOL_VERSION = "0.0.0";
 
-	void register(String email, String password) throws ProtocolException;
+	void register(String email, String password) throws EmailAlreadyRegisteredException, PasswordRequirementNotMetException;
 
-	void login(String email, String password) throws ProtocolException;
+	void login(String email, String password) throws EmailNotRegisteredException, PasswordInvalidException;
 
 	Channel[] getPublicGroups();
 
-	void joinGroup(int channelID) throws ProtocolException;
+	void joinGroup(int channelID) throws ChannelNotFoundException;
 
 	Channel[] getChannels();
 
-	User[] getChannelMembers(int channelID) throws ProtocolException;
+	User[] getChannelMembers(int channelID) throws NotMemberOfChannelException;
 
-	User getUser(String email) throws ProtocolException;
+	User getUser(String email) throws EmailNotRegisteredException;
 	
-	void addFriend(String email) throws ProtocolException;
+	void addFriend(String email) throws EmailNotRegisteredException;
 	
 	User[] getFriends();
 	
-	void sendMessage(int channelID, String data, DataType dataType) throws ProtocolException;
+	void sendMessage(int channelID, String data, DataType dataType) throws EmailNotRegisteredException, MessageTooLongException;
 	
-	Message[] receiveMessages(int channelID, Date tFrom, Date tUntil) throws ProtocolException;
+	Message[] receiveMessages(int channelID, Date tFrom, Date tUntil) throws NotMemberOfChannelException, TooManyMessagesException;
 	
 	void quit();
 
