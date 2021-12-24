@@ -7,16 +7,19 @@ import java.util.Arrays;
 import server.protocol.Channel;
 import server.protocol.Message;
 import server.protocol.Protocol;
+import server.protocol.ProtocolException;
 import server.protocol.User;
-import server.protocol.exceptions.ProtocolException;
-import server.protocol.exceptions.ProtocolException.ChannelNotFoundException;
-import server.protocol.exceptions.ProtocolException.EmailAlreadyRegisteredException;
-import server.protocol.exceptions.ProtocolException.EmailNotRegisteredException;
-import server.protocol.exceptions.ProtocolException.MessageTooLongException;
-import server.protocol.exceptions.ProtocolException.NotMemberOfChannelException;
-import server.protocol.exceptions.ProtocolException.PasswordInvalidException;
-import server.protocol.exceptions.ProtocolException.PasswordRequirementNotMetException;
-import server.protocol.exceptions.ProtocolException.TooManyMessagesException;
+import server.protocol.ProtocolException.ChannelNotFoundException;
+import server.protocol.ProtocolException.DmAlreadyExistsException;
+import server.protocol.ProtocolException.EmailAlreadyRegisteredException;
+import server.protocol.ProtocolException.EmailNotRegisteredException;
+import server.protocol.ProtocolException.InvalidParameterException;
+import server.protocol.ProtocolException.MessageTooLongException;
+import server.protocol.ProtocolException.NotMemberOfChannelException;
+import server.protocol.ProtocolException.PasswordInvalidException;
+import server.protocol.ProtocolException.PasswordRequirementNotMetException;
+import server.protocol.ProtocolException.TooManyMessagesException;
+import server.protocol.ProtocolException.UserNotFoundException;
 
 public class Session implements Protocol {
 
@@ -31,8 +34,11 @@ public class Session implements Protocol {
 
 	public String execute(String line) {
 
+		// debug/logging
 		System.out.println(line);
 
+		// replace with different limitation (MAX_MESSAGE_LENGTH refers to length of
+		// data of message)
 		if (line.length() > server.CFG.MAX_MESSAGE_LENGTH)
 			return response(Status.MESSAGE_TOO_LONG);
 
@@ -45,14 +51,31 @@ public class Session implements Protocol {
 			return response(Status.COMMAND_NOT_FOUND);
 		}
 
+		// check if state requirement is met (may have to rework this if more states get
+		// added)
+		if (!(cmd.getRequiredState() == state || state.hasParent(cmd.getRequiredState())))
+			return response(Status.AUTHENTICATION_REQUIRED);
+
+		// check if amount of parameters matches command
+		if (args.length - 1 != cmd.getNumArgs())
+			if (args.length - 1 < cmd.getNumArgs())
+				return response(Status.NOT_ENOUGH_PARAMETERS, cmd.getNumArgs());
+			else
+				return response(Status.TOO_MANY_PARAMETERS, cmd.getNumArgs());
+
 		try {
+
 			return switch (cmd) {
 			case ADDFRIEND -> {
-				addFriend(args[1]);
-				yield response(Status.OK);
+				try {
+					addFriend(getInt(args, 1));
+				} catch (InvalidParameterException e) {
+					addFriend(args[1]);
+				}
+				yield response();
 			}
 			case GETCHANNELMEMBERS -> {
-				User[] users = getChannelMembers(Integer.parseInt(args[1]));
+				User[] users = getChannelMembers(getInt(args, 1));
 				yield response(users);
 			}
 			case GETCHANNELS -> {
@@ -68,11 +91,16 @@ public class Session implements Protocol {
 				yield response(channels);
 			}
 			case GETUSER -> {
-				User user = getUser(args[1]);
+				User user;
+				try {
+					user = getUser(getInt(args, 1));
+				} catch (InvalidParameterException e) {
+					user = getUser(args[1]);
+				}
 				yield response(user);
 			}
 			case JOINGROUP -> {
-				joinGroup(Integer.parseInt(args[1]));
+				joinGroup(getInt(args, 1));
 				yield response();
 			}
 			case LOGIN -> {
@@ -81,72 +109,90 @@ public class Session implements Protocol {
 			}
 			case QUIT -> {
 				quit();
-				yield response(Status.OK);
+				yield response();
 			}
 			case RECEIVEMESSAGES -> {
-
-				// handle IllegalArgumetException
-//				Date tFrom = Date.valueOf(args[2]);
-//				Date tUntil = Date.valueOf(args[3]);
-//
-//				Message[] messages;
-//
-//				try {
-//					messages = receiveMessages(Integer.parseInt(args[1]), tFrom, tUntil);
-//				} catch (ProtocolException e) {
-//					Status status = e.getStatus();
-//					if (status == Status.TOO_MANY_MESSAGES) {
-//						response(status, messages);
-//					}
-//				}
-//				yield response(messages);
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+				Message[] messages = receiveMessages(Integer.parseInt(args[1]), getDate(args, 2), getDate(args, 3));
+				yield response(messages);
 			}
 			case REGISTER -> {
 				register(args[1], args[2]);
 				yield response();
 			}
-			case SENDDM -> {
-				// TODO
-				yield "NOT YET IMPLEMENTED";
+			case CREATEDM -> {
+				int channelId = createDm(getInt(args, 1));
+				yield response(channelId);
 			}
 			case SENDMESSAGE -> {
-				sendMessage(Integer.parseInt(args[1]), args[2], DataType.valueOf(args[3]));
+				DataType dataType = getEnum(args, 3, DataType.class);
+				sendMessage(getInt(args, 1), args[2], dataType);
 				yield response();
 			}
 			};
-		} catch (ArrayIndexOutOfBoundsException e) {
-			return response(Status.NOT_ENOUGH_PARAMETERS);
+
+		} catch (MessageTooLongException e) {
+			return response(e.getStatus(), e.getMaxMessageSize());
+		} catch (TooManyMessagesException e) {
+			return response(e.getStatus(), e.getLastMessageTime(), e.getMessages());
+		} catch (InvalidParameterException e) {
+			return response(e.getStatus(), e.getIndex());
 		} catch (ProtocolException e) {
 			return response(e.getStatus());
-		} catch (NumberFormatException e) {
-			return response(Status.INVALID_PARAMETER);
 		}
 
 	}
 
-	String response(Status status) {
+	private <T extends Enum<T>> T getEnum(String[] args, int i, Class<T> enumType) throws InvalidParameterException {
+		try {
+			return Enum.valueOf(enumType, args[i]);
+		} catch (NumberFormatException e) {
+			throw new InvalidParameterException(i);
+		}
+	}
+
+	private int getInt(String[] args, int i) throws InvalidParameterException {
+		try {
+			return Integer.parseInt(args[i]);
+		} catch (NumberFormatException e) {
+			throw new InvalidParameterException(i);
+		}
+	}
+
+	private Date getDate(String[] args, int i) throws InvalidParameterException {
+		try {
+			return Date.valueOf(args[i]);
+		} catch (IllegalArgumentException e) {
+			throw new InvalidParameterException(i);
+		}
+	}
+
+	// replace by response(Status status, Object...) -> iterate over array, call
+	// Array.toString() if obj is array)...
+	private String response(Status status, Object retVal1, Message[] retVal2) {
+		return String.format("%s %s %s", status, retVal1, Arrays.toString(retVal2));
+	}
+
+	private String response(Status status) {
 		return String.format("%s", status);
 	}
 
-	String response() {
+	private String response() {
 		return response(Status.OK);
 	}
 
-	String response(Status status, Object retVal) {
+	private String response(Status status, Object retVal) {
 		return String.format("%s %s", status, retVal);
 	}
 
-	String response(Status status, Object[] retVal) {
+	private String response(Status status, Object[] retVal) {
 		return String.format("%s %s", status, Arrays.toString(retVal));
 	}
 
-	String response(Object retVal) {
+	private String response(Object retVal) {
 		return response(Status.OK, retVal);
 	}
 
-	String response(Object[] retVal) {
+	private String response(Object[] retVal) {
 		return response(Status.OK, retVal);
 	}
 
@@ -168,7 +214,7 @@ public class Session implements Protocol {
 	@Override
 	public void login(String email, String password) throws EmailNotRegisteredException, PasswordInvalidException {
 		// TODO Auto-generated method stub
-
+		state = State.AUTHENTICATED;
 	}
 
 	@Override
@@ -178,7 +224,7 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public void joinGroup(int channelID) throws ChannelNotFoundException {
+	public void joinGroup(int channelId) throws ChannelNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
@@ -190,19 +236,31 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public User[] getChannelMembers(int channelID) throws NotMemberOfChannelException {
+	public User[] getChannelMembers(int channelId) throws NotMemberOfChannelException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public User getUser(String email) throws EmailNotRegisteredException {
+	public User getUser(int userId) throws UserNotFoundException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void addFriend(String email) throws EmailNotRegisteredException {
+	public User getUser(String email) throws UserNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addFriend(int userId) throws UserNotFoundException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addFriend(String email) throws UserNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
@@ -214,14 +272,20 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public void sendMessage(int channelID, String data, DataType dataType)
-			throws EmailNotRegisteredException, MessageTooLongException {
+	public void sendMessage(int channelId, String data, DataType dataType)
+			throws NotMemberOfChannelException, MessageTooLongException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Message[] receiveMessages(int channelID, Date tFrom, Date tUntil)
+	public int createDm(int userId) throws UserNotFoundException, DmAlreadyExistsException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Message[] receiveMessages(int channelId, Date tFrom, Date tUntil)
 			throws NotMemberOfChannelException, TooManyMessagesException {
 		// TODO Auto-generated method stub
 		return null;

@@ -1,13 +1,11 @@
-package server.protocol.exceptions;
+package server.protocol;
 
 import java.sql.Date;
 
-import server.protocol.Message;
-import server.protocol.Protocol;
 import server.protocol.Protocol.Status;
 
 public abstract class ProtocolException extends Exception {
-	
+
 	/**
 	 * 
 	 */
@@ -22,139 +20,177 @@ public abstract class ProtocolException extends Exception {
 		return status;
 	}
 
-	public class EmailAlreadyRegisteredException extends ProtocolException {
+	public static class InvalidParameterException extends ProtocolException {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4208867606970220161L;
+		private final int index;
+
+		public InvalidParameterException(int index) {
+			super(Protocol.Status.INVALID_PARAMETER);
+			this.index = index;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+	}
+
+	public static class EmailAlreadyRegisteredException extends ProtocolException {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 4237922086005335690L;
 
-		EmailAlreadyRegisteredException() {
+		public EmailAlreadyRegisteredException() {
 			super(Protocol.Status.EMAIL_ALREADY_REGISTERED);
 		}
 
 	}
 
-	public class PasswordRequirementNotMetException extends ProtocolException {
+	public static class PasswordRequirementNotMetException extends ProtocolException {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -1035791352733735378L;
 
-		PasswordRequirementNotMetException() {
+		public PasswordRequirementNotMetException() {
 			super(Protocol.Status.PASSWORD_REQ_NOT_MET);
 		}
 
 	}
-	
-	public class EmailNotRegisteredException extends ProtocolException {
+
+	public static class EmailNotRegisteredException extends ProtocolException {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -6532826769572086272L;
 
-		EmailNotRegisteredException() {
+		public EmailNotRegisteredException() {
 			super(Protocol.Status.EMAIL_NOT_REGISTERED);
 		}
 
 	}
-	
-	public class PasswordInvalidException extends ProtocolException {
+
+	public static class PasswordInvalidException extends ProtocolException {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -1832448351451110039L;
 
-		PasswordInvalidException() {
+		public PasswordInvalidException() {
 			super(Protocol.Status.PASSWORD_INVALID);
 		}
 
 	}
-	
-	public class NotMemberOfChannelException extends ProtocolException {
+
+	public static class NotMemberOfChannelException extends ProtocolException {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 2170636056686421482L;
 
-		NotMemberOfChannelException() {
+		public NotMemberOfChannelException() {
 			super(Protocol.Status.NOT_MEMBER_OF_CHANNEL);
 		}
 
 	}
-	
-	public class MessageTooLongException extends ProtocolException {
+
+	public static class MessageTooLongException extends ProtocolException {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -5241748522110696394L;
 		private final int MAX_MESSAGE_SIZE;
-		
-		MessageTooLongException(int MAX_MESSAGE_SIZE) {
+
+		public MessageTooLongException(int MAX_MESSAGE_SIZE) {
 			super(Protocol.Status.MESSAGE_TOO_LONG);
 			this.MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
 		}
-		
+
 		public int getMaxMessageSize() {
 			return MAX_MESSAGE_SIZE;
 		}
-		
+
 	}
-	
-	public class TooManyMessagesException extends ProtocolException {
+
+	public static class TooManyMessagesException extends ProtocolException {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 4931284760707863961L;
-		public final Date lastMessageTime;
+		private final Date lastMessageTime;
 		private final Message[] messages;
-		
-		TooManyMessagesException(Date lastMessageTime, Message[] messages) {
+
+		public TooManyMessagesException(Date lastMessageTime, Message[] messages) {
 			super(Protocol.Status.TOO_MANY_MESSAGES);
 			this.lastMessageTime = lastMessageTime;
 			this.messages = messages;
 		}
-		
+
 		public Date getLastMessageTime() {
 			return lastMessageTime;
 		}
-		
+
 		public Message[] getMessages() {
 			return messages;
 		}
-		
+
 	}
-	
-	public class ChannelNotFoundException extends ProtocolException {
+
+	public static class ChannelNotFoundException extends ProtocolException {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 6705554276488394002L;
 
-		ChannelNotFoundException() {
+		public ChannelNotFoundException() {
 			super(Protocol.Status.CHANNEL_NOT_FOUND);
 		}
-		
+
 	}
-	
-	public class DmAlreadyExistsException extends ProtocolException {
+
+	public static class UserNotFoundException extends ProtocolException {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 6940922235095667798L;
+
+		public UserNotFoundException() {
+			super(Protocol.Status.USER_NOT_FOUND);
+		}
+
+	}
+
+	public static class DmAlreadyExistsException extends ProtocolException {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 2923409626696600479L;
+		private final int channelId;
 
-		DmAlreadyExistsException() {
-			super(Protocol.Status.DM_ALREADY_EXISTING);
+		public DmAlreadyExistsException(int channelId) {
+			super(Protocol.Status.DM_ALREADY_EXISTS);
+			this.channelId = channelId;
 		}
-		
+
+		public int getChannelId() {
+			return channelId;
+		}
+
 	}
 
 }
