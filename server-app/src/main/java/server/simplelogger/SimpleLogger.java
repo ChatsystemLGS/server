@@ -12,7 +12,7 @@ public final class SimpleLogger {
 
 	}
 
-	private static void log(LogLevel logLevel, String message) {
+	public static void log(LogLevel logLevel, String message) {
 		for (LogListener logListener : logListeners) {
 			logListener.log(message, logLevel);
 		}
