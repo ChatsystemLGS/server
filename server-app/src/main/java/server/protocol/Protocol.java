@@ -2,6 +2,9 @@ package server.protocol;
 
 import java.sql.Date;
 
+import server.db.Channel;
+import server.db.Message;
+import server.db.User;
 import server.protocol.ProtocolException.ChannelNotFoundException;
 import server.protocol.ProtocolException.DmAlreadyExistsException;
 import server.protocol.ProtocolException.EmailAlreadyRegisteredException;

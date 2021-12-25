@@ -2,6 +2,7 @@ package server.protocol;
 
 import java.sql.Date;
 
+import server.db.Message;
 import server.protocol.Protocol.Status;
 
 public abstract class ProtocolException extends Exception {

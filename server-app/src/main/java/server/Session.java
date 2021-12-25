@@ -4,11 +4,11 @@ import java.sql.Date;
 
 import java.util.Arrays;
 
-import server.protocol.Channel;
-import server.protocol.Message;
+import server.db.Channel;
+import server.db.Message;
+import server.db.User;
 import server.protocol.Protocol;
 import server.protocol.ProtocolException;
-import server.protocol.User;
 import server.protocol.ProtocolException.ChannelNotFoundException;
 import server.protocol.ProtocolException.DmAlreadyExistsException;
 import server.protocol.ProtocolException.EmailAlreadyRegisteredException;
@@ -23,9 +23,10 @@ import server.protocol.ProtocolException.UserNotFoundException;
 
 public class Session implements Protocol {
 
-	private State state;
-
 	private final Server server;
+
+	private State state;
+	private User user;
 
 	public Session(Server server) {
 		this.server = server;
@@ -209,82 +210,70 @@ public class Session implements Protocol {
 
 	@Override
 	public void login(String email, String password) throws EmailNotRegisteredException, PasswordInvalidException {
-		// TODO Auto-generated method stub
+		user = server.DBC.getUser(new User(email, password));
 		state = State.AUTHENTICATED;
 	}
 
 	@Override
 	public Channel[] getPublicGroups() {
-		// TODO Auto-generated method stub
-		return null;
+		return server.DBC.getPublicGroups(user);
 	}
 
 	@Override
-	public void joinGroup(int channelId) throws ChannelNotFoundException {
-		// TODO Auto-generated method stub
-
+	public void joinGroup(int channelId) throws ChannelNotFoundException { // ChannelNotPublicException?
+		server.DBC.joinGroup(user, new Channel(channelId));
 	}
 
 	@Override
 	public Channel[] getChannels() {
-		// TODO Auto-generated method stub
-		return null;
+		return server.DBC.getChannels(user);
 	}
 
 	@Override
-	public User[] getChannelMembers(int channelId) throws NotMemberOfChannelException {
-		// TODO Auto-generated method stub
-		return null;
+	public User[] getChannelMembers(int channelId) throws NotMemberOfChannelException { // ChannelNotFoundException?
+		return server.DBC.getChannelMembers(new Channel(channelId));
 	}
 
 	@Override
 	public User getUser(int userId) throws UserNotFoundException {
-		// TODO Auto-generated method stub
-		return null;
+		return server.DBC.getUser(new User(userId));
 	}
 
 	@Override
 	public User getUser(String email) throws UserNotFoundException {
-		// TODO Auto-generated method stub
-		return null;
+		return server.DBC.getUser(new User(email));
 	}
 
 	@Override
 	public void addFriend(int userId) throws UserNotFoundException {
-		// TODO Auto-generated method stub
-
+		server.DBC.addFriend(user, new User(userId));
 	}
 
 	@Override
 	public void addFriend(String email) throws UserNotFoundException {
-		// TODO Auto-generated method stub
-
+		server.DBC.addFriend(user, new User(email));
 	}
 
 	@Override
 	public User[] getFriends() {
-		// TODO Auto-generated method stub
-		return null;
+		return server.DBC.getFriends(user);
 	}
 
 	@Override
 	public void sendMessage(int channelId, String data, DataType dataType)
 			throws NotMemberOfChannelException, MessageTooLongException {
-		// TODO Auto-generated method stub
-
+		server.DBC.sendMessage(user, new Channel(channelId), new Message(data, dataType));
 	}
 
 	@Override
 	public int createDm(int userId) throws UserNotFoundException, DmAlreadyExistsException {
-		// TODO Auto-generated method stub
-		return 0;
+		return server.DBC.createDm(user, new User(userId));
 	}
 
 	@Override
 	public Message[] receiveMessages(int channelId, Date tFrom, Date tUntil)
 			throws NotMemberOfChannelException, TooManyMessagesException {
-		// TODO Auto-generated method stub
-		return null;
+		return server.DBC.receiveMessages(user, new Channel(channelId), tFrom, tUntil);
 	}
 
 	@Override
