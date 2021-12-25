@@ -6,6 +6,9 @@ import java.net.Socket;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import server.simplelogger.SimpleLogger;
+import server.simplelogger.SimpleLogger.LogLevel;
+
 public class ClientHandler implements Runnable {
 
 	Socket client;
@@ -26,14 +29,16 @@ public class ClientHandler implements Runnable {
 	@Override
 	public void run() {
 		try {
-			pw.println(session.greet());
+			writeLine(session.greet());
 			while (session.getState() != Session.State.DISCONNECTED) {
-				pw.println(session.execute(s.nextLine()));
+				writeLine(session.execute(readLine()));
 			}
 		} catch (NoSuchElementException e) { // caused (by timeout, when underlying InputStream gets closed?) when
 												// Scanner has no more lines
 			session.disconnect();
 		} finally {
+			SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s : disconnected", client.getInetAddress(),
+					client.getPort());
 			try {
 				client.close();
 			} catch (IOException e) {
@@ -42,7 +47,19 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
+	private String readLine() {
+		String line = s.nextLine();
+		SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s > %s", client.getInetAddress(), client.getPort(), line);
+		return line;
+	}
+
+	private void writeLine(String line) {
+		SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s < %s", client.getInetAddress(), client.getPort(), line);
+		pw.println(line);
+	}
+
 	public static void createThread(Socket client, Server server) throws IOException {
+		SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s : connected", client.getInetAddress(), client.getPort());
 		new Thread(new ClientHandler(client, server)).start();
 	}
 

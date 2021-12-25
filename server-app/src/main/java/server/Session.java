@@ -34,9 +34,6 @@ public class Session implements Protocol {
 
 	public String execute(String line) {
 
-		// debug/logging
-		System.out.println(line);
-
 		// replace with different limitation (MAX_MESSAGE_LENGTH refers to length of
 		// data of message)
 		if (line.length() > server.CFG.MAX_MESSAGE_LENGTH)
@@ -207,8 +204,7 @@ public class Session implements Protocol {
 	@Override
 	public void register(String email, String password)
 			throws EmailAlreadyRegisteredException, PasswordRequirementNotMetException {
-		// TODO Auto-generated method stub
-
+		server.DBC.addUser(new User(email, password));
 	}
 
 	@Override
