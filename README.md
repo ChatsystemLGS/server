@@ -76,3 +76,7 @@ Connection 2:
 > MESSAGE [channelID] [data] [dataType] [timestamp]
 > ISTYPING [channelID] [userID]
 ```
+
+## Datenbankanbindung
+
+* authentifizierung wird nach login vorerst nicht erneut durchgeführt -> änderung des passworts führt nicht zu ende der Sitzung
