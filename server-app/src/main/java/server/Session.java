@@ -206,16 +206,16 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public void register(String email, String nickname, String password)
+	public void register(String emailAddress, String nickname, String password)
 			throws InternalServerErrorException, EmailAlreadyRegisteredException, PasswordRequirementNotMetException {
-		server.DBC.addUser(new User(email, nickname, password));
+		server.DBC.addUser(new User(null, emailAddress, nickname, password, null));
 	}
 
 	@Override
-	public void login(String email, String password)
+	public void login(String emailAddress, String password)
 			throws InternalServerErrorException, EmailNotRegisteredException, PasswordInvalidException {
 
-		User u = new User(email, password);
+		User u = new User(null, emailAddress, null, password, null);
 
 		user = server.DBC.login(u);
 		state = State.AUTHENTICATED;
@@ -243,23 +243,23 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public User getUser(int userId) throws UserNotFoundException {
-		return server.DBC.getUser(new User(userId));
+	public User getUser(int id) throws UserNotFoundException {
+		return server.DBC.getUser(new User(id, null, null, null, null));
 	}
 
 	@Override
-	public User getUser(String email) throws UserNotFoundException {
-		return server.DBC.getUser(new User(email));
+	public User getUser(String emailAddress) throws UserNotFoundException {
+		return server.DBC.getUser(new User(null, emailAddress, null, null, null));
 	}
 
 	@Override
-	public void addFriend(int userId) throws UserNotFoundException {
-		server.DBC.addFriend(user, new User(userId));
+	public void addFriend(int id) throws UserNotFoundException {
+		server.DBC.addFriend(user, new User(id, null, null, null, null));
 	}
 
 	@Override
-	public void addFriend(String email) throws UserNotFoundException {
-		server.DBC.addFriend(user, new User(email));
+	public void addFriend(String emailAddress) throws UserNotFoundException {
+		server.DBC.addFriend(user, new User(null, emailAddress, null, null, null));
 	}
 
 	@Override
@@ -274,8 +274,8 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public int createDm(int userId) throws UserNotFoundException, DmAlreadyExistsException {
-		return server.DBC.createDm(user, new User(userId));
+	public int createDm(int id) throws UserNotFoundException, DmAlreadyExistsException {
+		return server.DBC.createDm(user, new User(id, null, null, null, null));
 	}
 
 	@Override

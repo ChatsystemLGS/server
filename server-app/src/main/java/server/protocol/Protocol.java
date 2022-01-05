@@ -21,10 +21,10 @@ public interface Protocol {
 
 	static final String PROTOCOL_VERSION = "0.0.0";
 
-	void register(String email, String nickname, String password)
+	void register(String emailAddress, String nickname, String password)
 			throws InternalServerErrorException, EmailAlreadyRegisteredException, PasswordRequirementNotMetException;
 
-	void login(String email, String password) throws InternalServerErrorException, EmailNotRegisteredException, PasswordInvalidException;
+	void login(String emailAddress, String password) throws InternalServerErrorException, EmailNotRegisteredException, PasswordInvalidException;
 
 	Channel[] getPublicGroups();
 
@@ -34,20 +34,20 @@ public interface Protocol {
 
 	User[] getChannelMembers(int channelId) throws NotMemberOfChannelException;
 
-	User getUser(int userId) throws UserNotFoundException;
+	User getUser(int id) throws UserNotFoundException;
 
-	User getUser(String email) throws UserNotFoundException;
+	User getUser(String emailAddress) throws UserNotFoundException;
 
-	void addFriend(int userId) throws UserNotFoundException;
+	void addFriend(int id) throws UserNotFoundException;
 
-	void addFriend(String email) throws UserNotFoundException;
+	void addFriend(String emailAddress) throws UserNotFoundException;
 
 	User[] getFriends();
 
 	void sendMessage(int channelId, String data, DataType dataType)
 			throws NotMemberOfChannelException, MessageTooLongException;
 
-	int createDm(int userId) throws UserNotFoundException, DmAlreadyExistsException;
+	int createDm(int id) throws UserNotFoundException, DmAlreadyExistsException;
 
 	Message[] receiveMessages(int channelId, Date tFrom, Date tUntil)
 			throws NotMemberOfChannelException, TooManyMessagesException;

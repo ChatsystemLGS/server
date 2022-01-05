@@ -80,11 +80,11 @@ public class DatabaseConnector {
 			ResultSet rs = stmt.executeQuery();
 			rs.first();
 			int id = rs.getInt("id");
-			String email = rs.getString("emailAddress");
+			String emailAddress = rs.getString("emailAddress");
 			String nickname = rs.getString("nickname");
 			String note = rs.getString("note");
-
-			return new User(id, email, nickname, note);
+			
+			return new User(id, emailAddress, nickname, null, note);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException();

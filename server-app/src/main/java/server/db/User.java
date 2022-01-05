@@ -6,40 +6,25 @@ import java.util.Base64;
 
 public class User {
 
-	private int id;
+	private Integer id;
 	private String emailAddress;
 	private String nickname;
 	private String passwordHash;
 	private String note;
 
 	// TODO
-	// refactor -> only one constructor??
 	// check password requirements
 	// check email valid format
-	
-	public User(String emailAddress, String password) {
-		this.emailAddress = emailAddress;
-		this.passwordHash = hashPassword(password);
-	}
+	// change hashing algorithm to bcrypt and add salt
 
-	public User(int id) {
-		this.id = id;
-	}
-
-	public User(String emailAddress) {
-		this.emailAddress = emailAddress;
-	}
-	
-	public User(String emailAddress, String nickname, String password) {
-		this.emailAddress=emailAddress;
-		this.nickname=nickname;
-		this.passwordHash=hashPassword(password);
-	}
-
-	public User(int id, String emailAddress, String nickname, String note) {
+	public User(Integer id, String emailAddress, String nickname, String password, String note) {
 		this.id = id;
 		this.emailAddress = emailAddress;
 		this.nickname = nickname;
+		if (password != null)
+			this.passwordHash = hashPassword(password);
+		else
+			passwordHash = null;
 		this.note = note;
 	}
 
