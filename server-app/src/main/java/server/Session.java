@@ -146,7 +146,7 @@ public class Session implements Protocol {
 	private <T extends Enum<T>> T getEnum(String[] args, int i, Class<T> enumType) throws InvalidParameterException {
 		try {
 			return Enum.valueOf(enumType, args[i]);
-		} catch (NumberFormatException e) {
+		} catch (IllegalArgumentException e) {
 			throw new InvalidParameterException(i);
 		}
 	}
