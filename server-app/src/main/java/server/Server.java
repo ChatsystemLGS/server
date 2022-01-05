@@ -17,7 +17,7 @@ public class Server {
 	Server(Config cfg) {
 
 		CFG = cfg;
-		DBC = new DatabaseConnector(cfg.DB_HOST, cfg.DB_PORT);
+		DBC = new DatabaseConnector(cfg.DB_HOST, cfg.DB_PORT,cfg.DB_TABLE, cfg.DB_USER, cfg.DB_PASSWORD);
 
 		try (ServerSocket server = new ServerSocket(cfg.PORT)) {
 			SimpleLogger.logf(LogLevel.INFO, "Listening on port %s", cfg.PORT);

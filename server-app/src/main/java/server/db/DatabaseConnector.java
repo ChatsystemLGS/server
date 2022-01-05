@@ -4,8 +4,10 @@ import java.sql.Date;
 
 public class DatabaseConnector {
 
-	public DatabaseConnector(String dbHost, int dbPort) {
-		// TODO Auto-generated constructor stub
+	private final String connectionUrl;
+
+	public DatabaseConnector(String dbHost, int dbPort, String dbTable, String dbUser, String dbPassword) {
+		connectionUrl = String.format("jdbc:mysql://%s:%s/%s?user=%s&password=%s", dbHost, dbPort, dbTable, dbUser, dbPassword);
 	}
 
 	public void addUser(User user) {
