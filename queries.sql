@@ -22,21 +22,20 @@ LEFT JOIN userRelationships ur ON ur.userA=ur.userB
 WHERE u.emailAddress=[emailAddress];
 
 -- getPublicGroups
-SELECT c.id, c.type, c.name FROM Channels c WHERE c.type = "publicGroup";
+SELECT c.id id, c.type type, c.name name FROM Channels c WHERE c.type = 'PUBLIC_GROUP';
 
 -- joinGroup
 SELECT (
     SELECT c.type FROM Channels c WHERE c.id = [channelId]
-) = "publicGroup" isPublicGroup;
+) = 'PUBLIC_GROUP' isPublicGroup;
 
-INSERT INTO ChannelMembers(
+INSERT INTO channelMembers(
     user,
     channel
 ) VALUES (
     [userId],
     [channelId]
 );
-SELECT LAST_INSERT_ID();
 
 -- getChannels
 SELECT c.id, c.type, c.name FROM Channels c
@@ -63,8 +62,8 @@ INSERT INTO userRelationships (
 ) VALUES (
     [userA],
     [userB],
-    "friend"
-) ON DUPLICATE KEY UPDATE type = "friend";
+    'FRIEND'
+) ON DUPLICATE KEY UPDATE type = 'FRIEND';
 
 -- getFriends
 SELECT u.id, u.nickname, ur.note, ur.type FROM Users u
@@ -90,7 +89,7 @@ INSERT INTO Messages (
 INSERT INTO Channels (
     type
 ) VALUES (
-    "dm"
+    'DM'
 );
 SELECT LAST_INSERT_ID();
 INSERT INTO channelMembers (

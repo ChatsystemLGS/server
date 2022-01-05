@@ -44,8 +44,8 @@ public class Session implements Protocol {
 
 		Command cmd;
 		try {
-			cmd = Command.valueOf(args[0]);
-		} catch (IllegalArgumentException e) {
+			cmd = getEnum(args, 0, Command.class);
+		} catch (InvalidParameterException e) {
 			return response(Status.COMMAND_NOT_FOUND);
 		}
 
@@ -86,6 +86,7 @@ public class Session implements Protocol {
 			}
 			case GETPUBLICGROUPS -> {
 				Channel[] channels = getPublicGroups();
+				System.out.println(channels.length);
 				yield response(channels);
 			}
 			case GETUSER -> {
@@ -143,6 +144,8 @@ public class Session implements Protocol {
 
 	}
 
+	// convert string at some index in args to specified enum if possible; else
+	// throw exception
 	private <T extends Enum<T>> T getEnum(String[] args, int i, Class<T> enumType) throws InvalidParameterException {
 		try {
 			return Enum.valueOf(enumType, args[i]);
@@ -223,13 +226,13 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public Channel[] getPublicGroups() {
-		return server.DBC.getPublicGroups(user);
+	public Channel[] getPublicGroups() throws InternalServerErrorException {
+		return server.DBC.getPublicGroups();
 	}
 
 	@Override
-	public void joinGroup(int channelId) throws ChannelNotFoundException { // ChannelNotPublicException?
-		server.DBC.joinGroup(user, new Channel(channelId));
+	public void joinGroup(int channelId) throws InternalServerErrorException, ChannelNotFoundException { // ChannelNotPublicException?
+		server.DBC.joinGroup(user, new Channel(channelId, null, null));
 	}
 
 	@Override
@@ -239,7 +242,7 @@ public class Session implements Protocol {
 
 	@Override
 	public User[] getChannelMembers(int channelId) throws NotMemberOfChannelException { // ChannelNotFoundException?
-		return server.DBC.getChannelMembers(new Channel(channelId));
+		return server.DBC.getChannelMembers(new Channel(channelId, null, null));
 	}
 
 	@Override
@@ -270,7 +273,7 @@ public class Session implements Protocol {
 	@Override
 	public void sendMessage(int channelId, String data, DataType dataType)
 			throws NotMemberOfChannelException, MessageTooLongException {
-		server.DBC.sendMessage(user, new Channel(channelId), new Message(data, dataType));
+		server.DBC.sendMessage(user, new Channel(channelId, null, null), new Message(data, dataType));
 	}
 
 	@Override
@@ -281,7 +284,7 @@ public class Session implements Protocol {
 	@Override
 	public Message[] receiveMessages(int channelId, Date tFrom, Date tUntil)
 			throws NotMemberOfChannelException, TooManyMessagesException {
-		return server.DBC.receiveMessages(user, new Channel(channelId), tFrom, tUntil);
+		return server.DBC.receiveMessages(user, new Channel(channelId, null, null), tFrom, tUntil);
 	}
 
 	@Override

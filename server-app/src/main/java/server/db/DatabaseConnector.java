@@ -6,7 +6,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
+import server.db.Channel.ChannelType;
+import server.protocol.ProtocolException.ChannelNotFoundException;
 import server.protocol.ProtocolException.EmailAlreadyRegisteredException;
 import server.protocol.ProtocolException.EmailNotRegisteredException;
 import server.protocol.ProtocolException.InternalServerErrorException;
@@ -60,6 +63,7 @@ public class DatabaseConnector {
 				throw new EmailNotRegisteredException();
 			return authenticated;
 		}
+
 	}
 
 	public User login(User user)
@@ -83,7 +87,7 @@ public class DatabaseConnector {
 			String emailAddress = rs.getString("emailAddress");
 			String nickname = rs.getString("nickname");
 			String note = rs.getString("note");
-			
+
 			return new User(id, emailAddress, nickname, null, note);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -92,13 +96,68 @@ public class DatabaseConnector {
 
 	}
 
-	public Channel[] getPublicGroups(User user) {
-		// TODO Auto-generated method stub
-		return null;
+	public Channel[] getPublicGroups() throws InternalServerErrorException {
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"SELECT c.id id, c.type type, c.name name FROM Channels c WHERE c.type = 'PUBLIC_GROUP'")) {
+
+			ResultSet rs = stmt.executeQuery();
+
+			ArrayList<Channel> channelList = new ArrayList<>();
+
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				ChannelType type = ChannelType.valueOf(rs.getString("type"));
+				String name = rs.getString("name");
+				channelList.add(new Channel(id, type, name));
+			}
+
+			return channelList.toArray(new Channel[channelList.size()]);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException();
+		}
 	}
 
-	public void joinGroup(User user, Channel channel) {
-		// TODO Auto-generated method stub
+	private boolean isPublicGroup(Channel channel) throws SQLException, ChannelNotFoundException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"SELECT (SELECT c.type FROM Channels c WHERE c.id = ?) = 'PUBLIC_GROUP' isPublicGroup")) {
+			stmt.setInt(1, channel.getId());
+			ResultSet rs = stmt.executeQuery();
+			rs.first();
+			boolean isPublicGroup = rs.getBoolean("isPublicGroup");
+			if (rs.wasNull())
+				throw new ChannelNotFoundException();
+			return isPublicGroup;
+		}
+
+	}
+
+	public void joinGroup(User user, Channel channel) throws InternalServerErrorException, ChannelNotFoundException {
+
+		// check if group is of type PUBLIC_GROUP
+		try {
+			if (!isPublicGroup(channel))
+				throw new ChannelNotFoundException();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException();
+		}
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c
+						.prepareStatement("INSERT INTO channelMembers(user, channel) VALUES (?, ?)")) {
+			stmt.setInt(1, user.getId());
+			stmt.setInt(2, channel.getId());
+			if (stmt.executeUpdate() == 0)
+				; // TODO already member of group -> exception
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException();
+		}
 
 	}
 

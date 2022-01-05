@@ -26,9 +26,9 @@ public interface Protocol {
 
 	void login(String emailAddress, String password) throws InternalServerErrorException, EmailNotRegisteredException, PasswordInvalidException;
 
-	Channel[] getPublicGroups();
+	Channel[] getPublicGroups() throws InternalServerErrorException;
 
-	void joinGroup(int channelId) throws ChannelNotFoundException;
+	void joinGroup(int channelId) throws InternalServerErrorException, ChannelNotFoundException;
 
 	Channel[] getChannels();
 
