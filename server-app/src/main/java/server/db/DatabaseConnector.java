@@ -79,7 +79,7 @@ public class DatabaseConnector {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
-						"SELECT u.id id, u.emailAddress emailAddress, u.nickname nickname, ur.note note FROM Users u LEFT JOIN userRelationships ur ON ur.userA=ur.userB WHERE u.emailAddress=?");) {
+						"SELECT u.id id, u.emailAddress emailAddress, u.nickname nickname, ur.note note FROM Users u LEFT JOIN userRelationships ur ON ur.userA=ur.userB WHERE u.emailAddress = ?");) {
 			stmt.setString(1, user.getEmailAddress());
 			ResultSet rs = stmt.executeQuery();
 			rs.first();
@@ -161,9 +161,30 @@ public class DatabaseConnector {
 
 	}
 
-	public Channel[] getChannels(User user) {
-		// TODO Auto-generated method stub
-		return null;
+	public Channel[] getChannels(User user) throws InternalServerErrorException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"SELECT c.id id, c.type type, c.name name FROM Channels c INNER JOIN channelMembers cm ON cm.channel = c.id INNER JOIN Users u ON u.id = cm.user WHERE u.id = ?")) {
+			stmt.setInt(1, user.getId());
+			ResultSet rs = stmt.executeQuery();
+
+			ArrayList<Channel> channelList = new ArrayList<>();
+
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				ChannelType type = ChannelType.valueOf(rs.getString("type"));
+				String name = rs.getString("name");
+				channelList.add(new Channel(id, type, name));
+			}
+
+			return channelList.toArray(new Channel[channelList.size()]);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException();
+		}
+
 	}
 
 	public User[] getChannelMembers(Channel channel) {

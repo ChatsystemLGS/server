@@ -38,7 +38,7 @@ INSERT INTO channelMembers(
 );
 
 -- getChannels
-SELECT c.id, c.type, c.name FROM Channels c
+SELECT c.id id, c.type type, c.name name FROM Channels c
 INNER JOIN channelMembers cm ON cm.channel = c.id
 INNER JOIN Users u ON u.id = cm.user
 WHERE u.id = [userId];

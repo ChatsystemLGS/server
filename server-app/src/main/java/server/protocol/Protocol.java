@@ -30,7 +30,7 @@ public interface Protocol {
 
 	void joinGroup(int channelId) throws InternalServerErrorException, ChannelNotFoundException;
 
-	Channel[] getChannels();
+	Channel[] getChannels() throws InternalServerErrorException;
 
 	User[] getChannelMembers(int channelId) throws NotMemberOfChannelException;
 

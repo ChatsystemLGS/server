@@ -236,7 +236,7 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public Channel[] getChannels() {
+	public Channel[] getChannels() throws InternalServerErrorException {
 		return server.DBC.getChannels(user);
 	}
 

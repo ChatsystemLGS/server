@@ -26,7 +26,7 @@ public class Channel {
 	
 	@Override
 	public String toString() {
-		return String.format("%s %s", id, name);
+		return String.format("%s %s %s", id, type, name);
 	}
 
 	public enum ChannelType {
