@@ -15,3 +15,6 @@ build
 #   Eclipse
 .project
 .settings
+
+# VS Code
+.vscode
