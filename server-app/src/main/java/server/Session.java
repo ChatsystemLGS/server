@@ -114,7 +114,7 @@ public class Session implements Protocol {
 				yield response(messages);
 			}
 			case REGISTER -> {
-				register(args[1], args[2]);
+				register(args[1], args[2], args[3]);
 				yield response();
 			}
 			case CREATEDM -> {
@@ -206,9 +206,9 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public void register(String email, String password)
-			throws EmailAlreadyRegisteredException, PasswordRequirementNotMetException {
-		server.DBC.addUser(new User(email, password));
+	public void register(String email, String nickname, String password)
+			throws InternalServerErrorException, EmailAlreadyRegisteredException, PasswordRequirementNotMetException {
+		server.DBC.addUser(new User(email, nickname, password));
 	}
 
 	@Override

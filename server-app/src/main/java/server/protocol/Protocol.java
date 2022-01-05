@@ -21,8 +21,8 @@ public interface Protocol {
 
 	static final String PROTOCOL_VERSION = "0.0.0";
 
-	void register(String email, String password)
-			throws EmailAlreadyRegisteredException, PasswordRequirementNotMetException;
+	void register(String email, String nickname, String password)
+			throws InternalServerErrorException, EmailAlreadyRegisteredException, PasswordRequirementNotMetException;
 
 	void login(String email, String password) throws InternalServerErrorException, EmailNotRegisteredException, PasswordInvalidException;
 
@@ -89,7 +89,7 @@ public interface Protocol {
 
 	enum Command {
 
-		REGISTER(State.CONNECTED, 2),
+		REGISTER(State.CONNECTED, 3),
 		LOGIN(State.CONNECTED, 2),
 		GETPUBLICGROUPS(State.AUTHENTICATED, 0),
 		JOINGROUP(State.AUTHENTICATED, 1),

@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import server.protocol.ProtocolException.EmailAlreadyRegisteredException;
 import server.protocol.ProtocolException.EmailNotRegisteredException;
 import server.protocol.ProtocolException.InternalServerErrorException;
 import server.protocol.ProtocolException.PasswordInvalidException;
@@ -28,8 +29,20 @@ public class DatabaseConnector {
 		SimpleLogger.logf(LogLevel.INFO, "Connected to database %s:%s/%s", dbHost, dbPort, dbTable);
 	}
 
-	public void addUser(User user) {
-		// TODO Auto-generated method stub
+	public void addUser(User user) throws InternalServerErrorException, EmailAlreadyRegisteredException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"INSERT INTO Users (emailAddress, nickname, passwordHash) VALUES (?, ?, ?)")) {
+			stmt.setString(1, user.getEmailAddress());
+			stmt.setString(2, user.getNickname());
+			stmt.setString(3, user.getPasswordHash());
+			if (stmt.executeUpdate() == 0)
+				throw new EmailAlreadyRegisteredException();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException();
+		}
 
 	}
 
