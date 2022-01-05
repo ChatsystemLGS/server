@@ -15,6 +15,12 @@ SELECT (
     SELECT u.passwordHash FROM Users u WHERE u.emailAddress = [email]
 ) = [passwordHash] passwordMatches;
 
+
+-- login
+SELECT u.id id, u.emailAddress emailAddress, u.nickname nickname, ur.note note FROM Users u
+LEFT JOIN userRelationships ur ON ur.userA=ur.userB
+WHERE u.emailAddress=[emailAddress];
+
 -- getPublicGroups
 SELECT c.id, c.type, c.name FROM Channels c WHERE c.type = "publicGroup";
 
