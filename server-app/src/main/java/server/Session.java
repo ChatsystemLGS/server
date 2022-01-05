@@ -1,7 +1,6 @@
 package server;
 
 import java.sql.Date;
-
 import java.util.Arrays;
 
 import server.db.Channel;
@@ -13,6 +12,7 @@ import server.protocol.ProtocolException.ChannelNotFoundException;
 import server.protocol.ProtocolException.DmAlreadyExistsException;
 import server.protocol.ProtocolException.EmailAlreadyRegisteredException;
 import server.protocol.ProtocolException.EmailNotRegisteredException;
+import server.protocol.ProtocolException.InternalServerErrorException;
 import server.protocol.ProtocolException.InvalidParameterException;
 import server.protocol.ProtocolException.MessageTooLongException;
 import server.protocol.ProtocolException.NotMemberOfChannelException;
@@ -128,6 +128,9 @@ public class Session implements Protocol {
 			}
 			};
 
+		} catch (InternalServerErrorException e) {
+			quit();
+			return response(e.getStatus());
 		} catch (MessageTooLongException e) {
 			return response(e.getStatus(), e.getMaxMessageSize());
 		} catch (TooManyMessagesException e) {
@@ -209,9 +212,14 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public void login(String email, String password) throws EmailNotRegisteredException, PasswordInvalidException {
-		user = server.DBC.getUser(new User(email, password));
+	public void login(String email, String password)
+			throws InternalServerErrorException, EmailNotRegisteredException, PasswordInvalidException {
+
+		User u = new User(email, password);
+
+		user = server.DBC.login(u);
 		state = State.AUTHENTICATED;
+
 	}
 
 	@Override

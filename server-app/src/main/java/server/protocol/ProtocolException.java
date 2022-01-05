@@ -194,4 +194,17 @@ public abstract class ProtocolException extends Exception {
 
 	}
 
+	public static class InternalServerErrorException extends ProtocolException {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -9199244919909050026L;
+
+		public InternalServerErrorException() {
+			super(Protocol.Status.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
 }

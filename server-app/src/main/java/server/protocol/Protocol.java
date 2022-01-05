@@ -9,6 +9,7 @@ import server.protocol.ProtocolException.ChannelNotFoundException;
 import server.protocol.ProtocolException.DmAlreadyExistsException;
 import server.protocol.ProtocolException.EmailAlreadyRegisteredException;
 import server.protocol.ProtocolException.EmailNotRegisteredException;
+import server.protocol.ProtocolException.InternalServerErrorException;
 import server.protocol.ProtocolException.MessageTooLongException;
 import server.protocol.ProtocolException.NotMemberOfChannelException;
 import server.protocol.ProtocolException.PasswordInvalidException;
@@ -23,7 +24,7 @@ public interface Protocol {
 	void register(String email, String password)
 			throws EmailAlreadyRegisteredException, PasswordRequirementNotMetException;
 
-	void login(String email, String password) throws EmailNotRegisteredException, PasswordInvalidException;
+	void login(String email, String password) throws InternalServerErrorException, EmailNotRegisteredException, PasswordInvalidException;
 
 	Channel[] getPublicGroups();
 

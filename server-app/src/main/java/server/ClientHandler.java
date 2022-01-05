@@ -24,6 +24,9 @@ public class ClientHandler implements Runnable {
 		pw = new PrintWriter(client.getOutputStream(), true);
 
 		session = new Session(server);
+
+		SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s(%s) : connected", client.getInetAddress(), client.getPort(),
+				session.getState());
 	}
 
 	@Override
@@ -49,17 +52,18 @@ public class ClientHandler implements Runnable {
 
 	private String readLine() {
 		String line = s.nextLine();
-		SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s > %s", client.getInetAddress(), client.getPort(), line);
+		SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s(%s) > %s", client.getInetAddress(), client.getPort(),
+				session.getState(), line);
 		return line;
 	}
 
 	private void writeLine(String line) {
-		SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s < %s", client.getInetAddress(), client.getPort(), line);
+		SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s(%s) < %s", client.getInetAddress(), client.getPort(),
+				session.getState(), line);
 		pw.println(line);
 	}
 
 	public static void createThread(Socket client, Server server) throws IOException {
-		SimpleLogger.logf(LogLevel.DEBUG, "client [%s]:%s : connected", client.getInetAddress(), client.getPort());
 		new Thread(new ClientHandler(client, server)).start();
 	}
 
