@@ -24,7 +24,7 @@ WHERE u.emailAddress=[emailAddress];
 -- getPublicGroups
 SELECT c.id, c.type, c.name FROM Channels c WHERE c.type = "publicGroup";
 
--- joinGroup
+-- joinGroup | return value is probably wrong (TODO: discuss if return value makes sense)
 SELECT (
     SELECT c.type FROM Channels c WHERE c.id = [channelId]
 ) = "publicGroup" isPublicGroup;
@@ -44,13 +44,13 @@ INNER JOIN channelMembers cm ON cm.channel = c.id
 INNER JOIN Users u ON u.id = cm.user
 WHERE u.id = [userId];
 
--- getChannelMembers
+-- getChannelMembers | TODO: discuss sense
 SELECT u.id, u.nickname, ur.note, ur.type, cm.isAdmin FROM Users u
 INNER JOIN channelMembers cm ON cm.user = u.id
 INNER JOIN userRelationships ur ON ur.userB = u.id
-WHERE c.id = [channelId] AND ur.userA = [userId];
+WHERE u.id = [channelId] AND ur.userA = [userId];
 
--- getUser
+-- getUser | TODO: discuss sense
 SELECT u.id, u.nickname, ur.note, ur.type FROM Users u
 INNER JOIN  userRelationships ur ON ur.userB = u.id
 WHERE ur.userA = [userA] AND u.id = [userB];
@@ -66,12 +66,12 @@ INSERT INTO userRelationships (
     "friend"
 ) ON DUPLICATE KEY UPDATE type = "friend";
 
--- getFriends
+-- getFriends | should also display blocked friends?
 SELECT u.id, u.nickname, ur.note, ur.type FROM Users u
 INNER JOIN userRelationships ur ON ur.userB = u.id
 WHERE ur.userA = [userId];
 
--- sendMessage
+-- sendMessage | IDEA: auto apply timestamp by DB?
 INSERT INTO Messages (
     channel,
     author,
@@ -86,7 +86,7 @@ INSERT INTO Messages (
     [dataType]
 );
 
--- createDm
+-- createDm | really how this should work?
 INSERT INTO Channels (
     type
 ) VALUES (
