@@ -1,6 +1,7 @@
 package server;
 
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 import server.ProtocolException.InternalServerErrorException;
@@ -56,74 +57,82 @@ public class Session {
 				return response(Status.TOO_MANY_PARAMETERS, cmd.getNumArgs());
 
 		try {
+			
+			try {
 
-			return switch (cmd) {
-			case ADDFRIEND -> {
-				try {
-					server.DBC.addFriend(user, new User().withId(getInt(args, 1)));
+				return switch (cmd) {
+				case ADDFRIEND -> {
+					try {
+						server.DBC.addFriend(user, new User().withId(getInt(args, 1)));
 
-				} catch (InvalidParameterException e) {
-					server.DBC.addFriend(user, new User().withEmailAddress(args[1]));
+					} catch (InvalidParameterException e) {
+						server.DBC.addFriend(user, new User().withEmailAddress(args[1]));
+					}
+					yield response();
 				}
-				yield response();
-			}
-			case GETCHANNELMEMBERS -> {
-				User[] users = server.DBC.getChannelMembers(user, new Channel().withId(getInt(args, 1)));
-				yield response(users);
-			}
-			case GETCHANNELS -> {
-				Channel[] channels = server.DBC.getChannels(user);
-				yield response(channels);
-			}
-			case GETFRIENDS -> {
-				User[] users = server.DBC.getFriends(user);
-				yield response(users);
-			}
-			case GETPUBLICGROUPS -> {
-				Channel[] channels = server.DBC.getPublicGroups();
-				yield response(channels);
-			}
-			case GETUSER -> {
-				User user;
-				try {
-					user = server.DBC.getUser(new User().withId(getInt(args, 1)));
-				} catch (InvalidParameterException e) {
-					user = server.DBC.getUser(new User().withEmailAddress(args[1]));
+				case GETCHANNELMEMBERS -> {
+					User[] users = server.DBC.getChannelMembers(user, new Channel().withId(getInt(args, 1)));
+					yield response(users);
 				}
-				yield response(user);
+				case GETCHANNELS -> {
+					Channel[] channels = server.DBC.getChannels(user);
+					yield response(channels);
+				}
+				case GETFRIENDS -> {
+					User[] users = server.DBC.getFriends(user);
+					yield response(users);
+				}
+				case GETPUBLICGROUPS -> {
+					Channel[] channels = server.DBC.getPublicGroups();
+					yield response(channels);
+				}
+				case GETUSER -> {
+					User user;
+					try {
+						user = server.DBC.getUser(new User().withId(getInt(args, 1)));
+					} catch (InvalidParameterException e) {
+						user = server.DBC.getUser(new User().withEmailAddress(args[1]));
+					}
+					yield response(user);
+				}
+				case JOINGROUP -> {
+					server.DBC.joinGroup(user, new Channel().withId(getInt(args, 1)));
+					yield response();
+				}
+				case LOGIN -> {
+					user = server.DBC.login(new User().withEmailAddress(args[1]).withPassword(args[2]));
+					state = State.AUTHENTICATED;
+					yield response();
+				}
+				case QUIT -> {
+					state = State.DISCONNECTED;
+					yield response();
+				}
+				case RECEIVEMESSAGES -> {
+					Message[] messages = server.DBC.receiveMessages(user, new Channel().withId(getInt(args, 1)),
+							getDate(args, 2), getDate(args, 3));
+					yield response(messages);
+				}
+				case REGISTER -> {
+					server.DBC
+							.addUser(new User().withEmailAddress(args[1]).withNickname(args[2]).withPassword(args[3]));
+					yield response();
+				}
+				case CREATEDM -> {
+					int channelId = server.DBC.createDm(user, new User().withId(getInt(args, 1)));
+					yield response(channelId);
+				}
+				case SENDMESSAGE -> {
+					DataType dataType = getEnum(args, 3, DataType.class);
+					server.DBC.sendMessage(user, new Channel().withId(getInt(args, 1)), new Message(args[2], dataType));
+					yield response();
+				}
+				};
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw new InternalServerErrorException();
 			}
-			case JOINGROUP -> {
-				server.DBC.joinGroup(user, new Channel().withId(getInt(args, 1)));
-				yield response();
-			}
-			case LOGIN -> {
-				user = server.DBC.login(new User().withEmailAddress(args[1]).withPassword(args[2]));
-				state = State.AUTHENTICATED;
-				yield response();
-			}
-			case QUIT -> {
-				state = State.DISCONNECTED;
-				yield response();
-			}
-			case RECEIVEMESSAGES -> {
-				Message[] messages = server.DBC.receiveMessages(user, new Channel().withId(getInt(args, 1)),
-						getDate(args, 2), getDate(args, 3));
-				yield response(messages);
-			}
-			case REGISTER -> {
-				server.DBC.addUser(new User().withEmailAddress(args[1]).withNickname(args[2]).withPassword(args[3]));
-				yield response();
-			}
-			case CREATEDM -> {
-				int channelId = server.DBC.createDm(user, new User().withId(getInt(args, 1)));
-				yield response(channelId);
-			}
-			case SENDMESSAGE -> {
-				DataType dataType = getEnum(args, 3, DataType.class);
-				server.DBC.sendMessage(user, new Channel().withId(getInt(args, 1)), new Message(args[2], dataType));
-				yield response();
-			}
-			};
 
 		} catch (InternalServerErrorException e) {
 			state = State.DISCONNECTED;

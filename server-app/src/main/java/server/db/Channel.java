@@ -2,40 +2,39 @@ package server.db;
 
 public class Channel extends TransmittableObject {
 
-	private Integer id;
-	private ChannelType type;
-	private String name;
-
+	private Attr<Integer> id = new Attr<>();
+	private Attr<ChannelType> type = new Attr<>();
+	private Attr<String> name = new Attr<>();
+	
+	public Channel() {
+		registerAttributes(id, type, name);
+	}
+	
 	public Channel withId(Integer id) {
-		this.id = id;
+		this.id.set(id);
 		return this;
 	}
 
 	public Channel withType(ChannelType type) {
-		this.type = type;
+		this.type.set(type);
 		return this;
 	}
 
 	public Channel withName(String name) {
-		this.name = name;
+		this.name.set(name);
 		return this;
 	}
 
 	public Integer getId() {
-		return id;
+		return id.getValue();
 	}
 
 	public ChannelType getType() {
-		return type;
+		return type.getValue();
 	}
 
 	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String toString() {
-		return objsToString(id, type, name);
+		return name.getValue();
 	}
 
 	public enum ChannelType {

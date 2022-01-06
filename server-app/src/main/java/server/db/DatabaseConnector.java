@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import server.ProtocolException.ChannelNotFoundException;
 import server.ProtocolException.EmailAlreadyRegisteredException;
 import server.ProtocolException.EmailNotRegisteredException;
-import server.ProtocolException.InternalServerErrorException;
 import server.ProtocolException.MessageTooLongException;
 import server.ProtocolException.PasswordInvalidException;
 import server.ProtocolException.TooManyMessagesException;
@@ -35,7 +34,7 @@ public class DatabaseConnector {
 		SimpleLogger.logf(LogLevel.INFO, "Connected to database %s:%s/%s", dbHost, dbPort, dbTable);
 	}
 
-	public void addUser(User user) throws InternalServerErrorException, EmailAlreadyRegisteredException {
+	public void addUser(User user) throws SQLException, EmailAlreadyRegisteredException {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
@@ -45,9 +44,6 @@ public class DatabaseConnector {
 			stmt.setString(3, user.getPasswordHash());
 			if (stmt.executeUpdate() == 0)
 				throw new EmailAlreadyRegisteredException();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException();
 		}
 
 	}
@@ -69,16 +65,10 @@ public class DatabaseConnector {
 
 	}
 
-	public User login(User user)
-			throws InternalServerErrorException, PasswordInvalidException, EmailNotRegisteredException {
+	public User login(User user) throws SQLException, PasswordInvalidException, EmailNotRegisteredException {
 
-		try {
-			if (!checkAuth(user))
-				throw new PasswordInvalidException();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException();
-		}
+		if (!checkAuth(user))
+			throw new PasswordInvalidException();
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
@@ -94,14 +84,11 @@ public class DatabaseConnector {
 			String note = rs.getString("note");
 
 			return new User().withId(id).withEmailAddress(emailAddress).withNickname(nickname).withNote(note);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException();
 		}
 
 	}
 
-	public Channel[] getPublicGroups() throws InternalServerErrorException {
+	public Channel[] getPublicGroups() throws SQLException {
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
 						"SELECT c.id id, c.type type, c.name name FROM Channels c WHERE c.type = 'PUBLIC_GROUP'")) {
@@ -118,10 +105,6 @@ public class DatabaseConnector {
 			}
 
 			return channelList.toArray(new Channel[channelList.size()]);
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException();
 		}
 	}
 
@@ -141,16 +124,11 @@ public class DatabaseConnector {
 
 	}
 
-	public void joinGroup(User user, Channel channel) throws InternalServerErrorException, ChannelNotFoundException {
+	public void joinGroup(User user, Channel channel) throws SQLException, ChannelNotFoundException {
 
 		// check if group is of type PUBLIC_GROUP
-		try {
-			if (!isPublicGroup(channel))
-				throw new ChannelNotFoundException();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException();
-		}
+		if (!isPublicGroup(channel))
+			throw new ChannelNotFoundException();
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c
@@ -159,14 +137,11 @@ public class DatabaseConnector {
 			stmt.setInt(2, channel.getId());
 			if (stmt.executeUpdate() == 0)
 				; // TODO already member of group -> exception
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException();
 		}
 
 	}
 
-	public Channel[] getChannels(User user) throws InternalServerErrorException {
+	public Channel[] getChannels(User user) throws SQLException {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement("SELECT c.id id, c.type type, c.name name FROM Channels c "
@@ -185,16 +160,12 @@ public class DatabaseConnector {
 			}
 
 			return channelList.toArray(new Channel[channelList.size()]);
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException();
 		}
 
 	}
 
 	// TODO check if user is member/channel is publicgroup
-	public User[] getChannelMembers(User user, Channel channel) throws InternalServerErrorException {
+	public User[] getChannelMembers(User user, Channel channel) throws SQLException {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
@@ -219,10 +190,6 @@ public class DatabaseConnector {
 			}
 
 			return userList.toArray(new User[userList.size()]);
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException();
 		}
 
 	}
@@ -237,9 +204,28 @@ public class DatabaseConnector {
 
 	}
 
-	public User[] getFriends(User user) {
-		// TODO Auto-generated method stub
-		return null;
+	public User[] getFriends(User user) throws SQLException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u "
+								+ "INNER JOIN userRelationships ur ON ur.userB = u.id " + "WHERE ur.userA = ?")) {
+			stmt.setInt(1, user.getId());
+			ResultSet rs = stmt.executeQuery();
+
+			ArrayList<User> userList = new ArrayList<>();
+
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				String nickname = rs.getString("nickname");
+				String note = rs.getString("note");
+				RelationshipType type = RelationshipType.valueOf(rs.getString("type"));
+				userList.add(new User().withId(id).withNickname(nickname).withNote(note).withType(type));
+			}
+
+			return userList.toArray(new User[userList.size()]);
+		}
+
 	}
 
 	public void sendMessage(User user, Channel channel, Message message) throws MessageTooLongException {

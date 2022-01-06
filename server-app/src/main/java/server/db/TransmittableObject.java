@@ -1,38 +1,28 @@
 package server.db;
 
-import java.util.Base64;
+import java.util.Arrays;
 
 public abstract class TransmittableObject {
 
-	@Override
-	public abstract String toString();
+	private Attr<?>[] attributes = new Attr<?>[0];
 
-	protected String objsToString(Object... objects) {
+	// should be called to register all attributes that should be included in
+	// generated String
+	protected void registerAttributes(Attr<?>... attributes) {
+		this.attributes = attributes;
+	}
+
+	@Override
+	public String toString() {
+
+		Attr<?>[] filteredAttributes = Arrays.stream(attributes).filter(a -> a.isSet()).toArray(Attr<?>[]::new);
 
 		String s = "";
 
-		for (int i = 0; i < objects.length - 1; i++) {
-			s += objToString(objects[i], true);
+		for (int i = 0; i < filteredAttributes.length - 1; i++) {
+			s += filteredAttributes[i].toString() + " ";
 		}
-		s += objToString(objects[objects.length - 1], false);
-
-		return s;
-	}
-
-	private String objToString(Object o, boolean space) {
-
-		if (o == null)
-			return "";
-
-		String s;
-
-		if (o instanceof String)
-			s = Base64.getEncoder().encodeToString(((String) o).getBytes());
-		else
-			s = o.toString();
-
-		if (space)
-			s += " ";
+		s += filteredAttributes[filteredAttributes.length - 1].toString();
 
 		return s;
 	}
