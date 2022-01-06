@@ -57,7 +57,7 @@ public class Session {
 				return response(Status.TOO_MANY_PARAMETERS, cmd.getNumArgs());
 
 		try {
-			
+
 			try {
 
 				return switch (cmd) {
@@ -89,9 +89,9 @@ public class Session {
 				case GETUSER -> {
 					User user;
 					try {
-						user = server.DBC.getUser(new User().withId(getInt(args, 1)));
+						user = server.DBC.getUserById(this.user, new User().withId(getInt(args, 1)));
 					} catch (InvalidParameterException e) {
-						user = server.DBC.getUser(new User().withEmailAddress(args[1]));
+						user = server.DBC.getUserByEmail(this.user, new User().withEmailAddress(args[1]));
 					}
 					yield response(user);
 				}
@@ -128,7 +128,7 @@ public class Session {
 					yield response();
 				}
 				};
-				
+
 			} catch (SQLException e) {
 				e.printStackTrace();
 				throw new InternalServerErrorException();

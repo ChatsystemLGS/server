@@ -50,7 +50,7 @@ INNER JOIN userRelationships ur ON ur.userB = u.id
 WHERE cm.channel = [channelId] AND ur.userA = [userId];
 
 -- getUser
-SELECT u.id, u.nickname, ur.note, ur.type FROM Users u
+SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u
 INNER JOIN  userRelationships ur ON ur.userB = u.id
 WHERE ur.userA = [userA] AND u.id = [userB];
 

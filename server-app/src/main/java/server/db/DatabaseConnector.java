@@ -14,6 +14,7 @@ import server.ProtocolException.EmailNotRegisteredException;
 import server.ProtocolException.MessageTooLongException;
 import server.ProtocolException.PasswordInvalidException;
 import server.ProtocolException.TooManyMessagesException;
+import server.ProtocolException.UserNotFoundException;
 import server.db.Channel.ChannelType;
 import server.db.User.RelationshipType;
 import server.simplelogger.SimpleLogger;
@@ -52,7 +53,7 @@ public class DatabaseConnector {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
-						"SELECT (SELECT u.passwordHash FROM Users u WHERE u.emailAddress = ?) = ? passwordMatches");) {
+						"SELECT (SELECT u.passwordHash FROM Users u WHERE u.emailAddress = ?) = ? passwordMatches")) {
 			stmt.setString(1, user.getEmailAddress());
 			stmt.setString(2, user.getPasswordHash());
 			ResultSet rs = stmt.executeQuery();
@@ -74,7 +75,7 @@ public class DatabaseConnector {
 				PreparedStatement stmt = c.prepareStatement(
 						"SELECT u.id id, u.emailAddress emailAddress, u.nickname nickname, ur.note note FROM Users u "
 								+ "LEFT JOIN userRelationships ur ON ur.userA=ur.userB "
-								+ "WHERE u.emailAddress = ?");) {
+								+ "WHERE u.emailAddress = ?")) {
 			stmt.setString(1, user.getEmailAddress());
 			ResultSet rs = stmt.executeQuery();
 			rs.first();
@@ -194,9 +195,57 @@ public class DatabaseConnector {
 
 	}
 
-	public User getUser(User user) {
-		// TODO Auto-generated method stub
-		return null;
+	public User getUserById(User userA, User userB) throws SQLException, UserNotFoundException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u "
+								+ "INNER JOIN userRelationships ur ON ur.userB = u.id "
+								+ "WHERE ur.userA = ? AND u.id = ?")) {
+			stmt.setInt(1, userA.getId());
+			stmt.setInt(2, userB.getId());
+
+			ResultSet rs = stmt.executeQuery();
+
+			if (!rs.next())
+				throw new UserNotFoundException();
+
+			int id = rs.getInt("id");
+			String nickname = rs.getString("nickname");
+			String note = rs.getString("note");
+			RelationshipType type = RelationshipType.valueOf(rs.getString("type"));
+
+			return new User().withId(id).withNickname(nickname).withNote(note).withType(type);
+		}
+
+	}
+
+	// TODO even if userA == userB we should return the user
+	public User getUserByEmail(User userA, User userB) throws SQLException, UserNotFoundException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u "
+								+ "INNER JOIN userRelationships ur ON ur.userB = u.id "
+								+ "WHERE ur.userA = ? AND u.emailAddress = ?")) {
+			stmt.setInt(1, userA.getId());
+			stmt.setString(2, userB.getEmailAddress());
+
+			System.out.println(userB.getEmailAddress());
+
+			ResultSet rs = stmt.executeQuery();
+
+			if (!rs.next())
+				throw new UserNotFoundException();
+
+			int id = rs.getInt("id");
+			String nickname = rs.getString("nickname");
+			String note = rs.getString("note");
+			RelationshipType type = RelationshipType.valueOf(rs.getString("type"));
+
+			return new User().withId(id).withNickname(nickname).withNote(note).withType(type);
+		}
+
 	}
 
 	public void addFriend(User use, User friend) {
