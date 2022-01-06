@@ -173,10 +173,10 @@ public class DatabaseConnector {
 				PreparedStatement stmt = c.prepareStatement(
 						"SELECT u.id id, u.nickname nickname, ur.note note, ur.type type, cm.isAdmin isAdmin FROM Users u "
 								+ "INNER JOIN channelMembers cm ON cm.user = u.id "
-								+ "INNER JOIN userRelationships ur ON ur.userB = u.id "
-								+ "WHERE cm.channel = ? AND ur.userA = ?")) {
-			stmt.setInt(1, channel.getId());
-			stmt.setInt(2, user.getId());
+								+ "LEFT JOIN userRelationships ur ON ur.userB = u.id AND userA = ? "
+								+ "WHERE cm.channel = ?")) {
+			stmt.setInt(1, user.getId());
+			stmt.setInt(2, channel.getId());
 			ResultSet rs = stmt.executeQuery();
 
 			ArrayList<User> userList = new ArrayList<>();
@@ -185,8 +185,16 @@ public class DatabaseConnector {
 				int id = rs.getInt("id");
 				String nickname = rs.getString("nickname");
 				String note = rs.getString("note");
-				RelationshipType type = RelationshipType.valueOf(rs.getString("type"));
+
+				RelationshipType type;
+				String typeString = rs.getString("type");
+				if (typeString == null)
+					type = null;
+				else
+					type = RelationshipType.valueOf(typeString);
+
 				boolean isAdmin = rs.getBoolean("isAdmin");
+
 				userList.add(
 						new User().withId(id).withNickname(nickname).withNote(note).withType(type).withAdmin(isAdmin));
 			}
