@@ -60,14 +60,15 @@ public class Session {
 			return switch (cmd) {
 			case ADDFRIEND -> {
 				try {
-					server.DBC.addFriend(user, new User(getInt(args, 1), null, null, null, null, null, null));
+					server.DBC.addFriend(user, new User().withId(getInt(args, 1)));
+
 				} catch (InvalidParameterException e) {
-					server.DBC.addFriend(user, new User(null, args[1], null, null, null, null, null));
+					server.DBC.addFriend(user, new User().withEmailAddress(args[1]));
 				}
 				yield response();
 			}
 			case GETCHANNELMEMBERS -> {
-				User[] users = server.DBC.getChannelMembers(user, new Channel(getInt(args, 1), null, null));
+				User[] users = server.DBC.getChannelMembers(user, new Channel().withId(getInt(args, 1)));
 				yield response(users);
 			}
 			case GETCHANNELS -> {
@@ -85,18 +86,18 @@ public class Session {
 			case GETUSER -> {
 				User user;
 				try {
-					user = server.DBC.getUser(new User(getInt(args, 1), null, null, null, null, null, null));
+					user = server.DBC.getUser(new User().withId(getInt(args, 1)));
 				} catch (InvalidParameterException e) {
-					user = server.DBC.getUser(new User(null, args[1], null, null, null, null, null));
+					user = server.DBC.getUser(new User().withEmailAddress(args[1]));
 				}
 				yield response(user);
 			}
 			case JOINGROUP -> {
-				server.DBC.joinGroup(user, new Channel(getInt(args, 1), null, null));
+				server.DBC.joinGroup(user, new Channel().withId(getInt(args, 1)));
 				yield response();
 			}
 			case LOGIN -> {
-				user = server.DBC.login(new User(null, args[1], null, args[2], null, null, null));
+				user = server.DBC.login(new User().withEmailAddress(args[1]).withPassword(args[2]));
 				state = State.AUTHENTICATED;
 				yield response();
 			}
@@ -105,22 +106,21 @@ public class Session {
 				yield response();
 			}
 			case RECEIVEMESSAGES -> {
-				Message[] messages = server.DBC.receiveMessages(user,
-						new Channel(Integer.parseInt(args[1]), null, null), getDate(args, 2), getDate(args, 3));
+				Message[] messages = server.DBC.receiveMessages(user, new Channel().withId(getInt(args, 1)),
+						getDate(args, 2), getDate(args, 3));
 				yield response(messages);
 			}
 			case REGISTER -> {
-				server.DBC.addUser(new User(null, args[1], args[2], args[3], null, null, null));
+				server.DBC.addUser(new User().withEmailAddress(args[1]).withNickname(args[2]).withPassword(args[3]));
 				yield response();
 			}
 			case CREATEDM -> {
-				int channelId = server.DBC.createDm(user,
-						new User(getInt(args, 1), null, null, null, null, null, null));
+				int channelId = server.DBC.createDm(user, new User().withId(getInt(args, 1)));
 				yield response(channelId);
 			}
 			case SENDMESSAGE -> {
 				DataType dataType = getEnum(args, 3, DataType.class);
-				server.DBC.sendMessage(user, new Channel(getInt(args, 1), null, null), new Message(args[2], dataType));
+				server.DBC.sendMessage(user, new Channel().withId(getInt(args, 1)), new Message(args[2], dataType));
 				yield response();
 			}
 			};

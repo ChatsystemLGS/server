@@ -93,7 +93,7 @@ public class DatabaseConnector {
 			String nickname = rs.getString("nickname");
 			String note = rs.getString("note");
 
-			return new User(id, emailAddress, nickname, null, note, null, null);
+			return new User().withId(id).withEmailAddress(emailAddress).withNickname(nickname).withNote(note);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException();
@@ -114,7 +114,7 @@ public class DatabaseConnector {
 				int id = rs.getInt("id");
 				ChannelType type = ChannelType.valueOf(rs.getString("type"));
 				String name = rs.getString("name");
-				channelList.add(new Channel(id, type, name));
+				channelList.add(new Channel().withId(id).withType(type).withName(name));
 			}
 
 			return channelList.toArray(new Channel[channelList.size()]);
@@ -181,7 +181,7 @@ public class DatabaseConnector {
 				int id = rs.getInt("id");
 				ChannelType type = ChannelType.valueOf(rs.getString("type"));
 				String name = rs.getString("name");
-				channelList.add(new Channel(id, type, name));
+				channelList.add(new Channel().withId(id).withType(type).withName(name));
 			}
 
 			return channelList.toArray(new Channel[channelList.size()]);
@@ -214,7 +214,8 @@ public class DatabaseConnector {
 				String note = rs.getString("note");
 				RelationshipType type = RelationshipType.valueOf(rs.getString("type"));
 				boolean isAdmin = rs.getBoolean("isAdmin");
-				userList.add(new User(id, null, nickname, null, note, type, isAdmin));
+				userList.add(
+						new User().withId(id).withNickname(nickname).withNote(note).withType(type).withAdmin(isAdmin));
 			}
 
 			return userList.toArray(new User[userList.size()]);
@@ -251,7 +252,8 @@ public class DatabaseConnector {
 		return 0;
 	}
 
-	public Message[] receiveMessages(User user, Channel channel, Date tFrom, Date tUntil) throws TooManyMessagesException {
+	public Message[] receiveMessages(User user, Channel channel, Date tFrom, Date tUntil)
+			throws TooManyMessagesException {
 		// TODO Auto-generated method stub
 		return null;
 	}
