@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 
 import server.ProtocolException.ChannelNotFoundException;
@@ -248,8 +249,16 @@ public class DatabaseConnector {
 
 	}
 
-	public void addFriend(User use, User friend) {
-		// TODO Auto-generated method stub
+	public void addFriendById(User user, User friend) throws SQLException, UserNotFoundException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement("INSERT INTO userRelationships (userA, userB, type) "
+						+ "VALUES (?, ?, 'FRIEND') ON DUPLICATE KEY UPDATE type = 'FRIEND'")) {
+			stmt.setInt(1, user.getId());
+			stmt.setInt(2, friend.getId());
+		} catch (SQLIntegrityConstraintViolationException e) {
+			throw new UserNotFoundException();
+		}
 
 	}
 

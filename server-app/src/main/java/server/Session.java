@@ -62,12 +62,12 @@ public class Session {
 
 				return switch (cmd) {
 				case ADDFRIEND -> {
-					try {
-						server.DBC.addFriend(user, new User().withId(getInt(args, 1)));
+//					try {
+					server.DBC.addFriendById(user, new User().withId(getInt(args, 1)));
 
-					} catch (InvalidParameterException e) {
-						server.DBC.addFriend(user, new User().withEmailAddress(args[1]));
-					}
+//					} catch (InvalidParameterException e) {
+//						server.DBC.addFriendByEmail(user, new User().withEmailAddress(args[1]));
+//					}
 					yield response();
 				}
 				case GETCHANNELMEMBERS -> {
