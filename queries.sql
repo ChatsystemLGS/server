@@ -49,10 +49,15 @@ INNER JOIN channelMembers cm ON cm.user = u.id
 INNER JOIN userRelationships ur ON ur.userB = u.id
 WHERE cm.channel = [channelId] AND ur.userA = [userId];
 
--- getUser
+-- getUserById
 SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u
 INNER JOIN  userRelationships ur ON ur.userB = u.id
 WHERE ur.userA = [userA] AND u.id = [userB];
+
+-- getUserByEmail
+SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u
+INNER JOIN  userRelationships ur ON ur.userB = u.id
+WHERE ur.userA = [userA] AND u.emailAddress = [userB];
 
 -- addFriend
 INSERT INTO userRelationships (
