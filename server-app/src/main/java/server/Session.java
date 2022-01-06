@@ -211,14 +211,14 @@ public class Session implements Protocol {
 	@Override
 	public void register(String emailAddress, String nickname, String password)
 			throws InternalServerErrorException, EmailAlreadyRegisteredException, PasswordRequirementNotMetException {
-		server.DBC.addUser(new User(null, emailAddress, nickname, password, null));
+		server.DBC.addUser(new User(null, emailAddress, nickname, password, null, null, null));
 	}
 
 	@Override
 	public void login(String emailAddress, String password)
 			throws InternalServerErrorException, EmailNotRegisteredException, PasswordInvalidException {
 
-		User u = new User(null, emailAddress, null, password, null);
+		User u = new User(null, emailAddress, null, password, null, null, null);
 
 		user = server.DBC.login(u);
 		state = State.AUTHENTICATED;
@@ -241,28 +241,28 @@ public class Session implements Protocol {
 	}
 
 	@Override
-	public User[] getChannelMembers(int channelId) throws NotMemberOfChannelException { // ChannelNotFoundException?
-		return server.DBC.getChannelMembers(new Channel(channelId, null, null));
+	public User[] getChannelMembers(int channelId) throws InternalServerErrorException, NotMemberOfChannelException { // ChannelNotFoundException?
+		return server.DBC.getChannelMembers(user, new Channel(channelId, null, null));
 	}
 
 	@Override
 	public User getUser(int id) throws UserNotFoundException {
-		return server.DBC.getUser(new User(id, null, null, null, null));
+		return server.DBC.getUser(new User(id, null, null, null, null, null, null));
 	}
 
 	@Override
 	public User getUser(String emailAddress) throws UserNotFoundException {
-		return server.DBC.getUser(new User(null, emailAddress, null, null, null));
+		return server.DBC.getUser(new User(null, emailAddress, null, null, null, null, null));
 	}
 
 	@Override
 	public void addFriend(int id) throws UserNotFoundException {
-		server.DBC.addFriend(user, new User(id, null, null, null, null));
+		server.DBC.addFriend(user, new User(id, null, null, null, null, null, null));
 	}
 
 	@Override
 	public void addFriend(String emailAddress) throws UserNotFoundException {
-		server.DBC.addFriend(user, new User(null, emailAddress, null, null, null));
+		server.DBC.addFriend(user, new User(null, emailAddress, null, null, null, null, null));
 	}
 
 	@Override
@@ -278,7 +278,7 @@ public class Session implements Protocol {
 
 	@Override
 	public int createDm(int id) throws UserNotFoundException, DmAlreadyExistsException {
-		return server.DBC.createDm(user, new User(id, null, null, null, null));
+		return server.DBC.createDm(user, new User(id, null, null, null, null, null, null));
 	}
 
 	@Override

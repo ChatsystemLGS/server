@@ -1,6 +1,6 @@
 package server.db;
 
-public class Channel {
+public class Channel extends TransmittableObject {
 	
 	private Integer id;
 	private ChannelType type;
@@ -23,12 +23,12 @@ public class Channel {
 	public String getName() {
 		return name;
 	}
-	
+
 	@Override
 	public String toString() {
-		return String.format("%s %s %s", id, type, name);
+		return objsToString(id, type, name);
 	}
-
+	
 	public enum ChannelType {
 		DM,
 		PUBLIC_GROUP,

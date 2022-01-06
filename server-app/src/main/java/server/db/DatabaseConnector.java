@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import server.db.Channel.ChannelType;
+import server.db.User.RelationshipType;
 import server.protocol.ProtocolException.ChannelNotFoundException;
 import server.protocol.ProtocolException.EmailAlreadyRegisteredException;
 import server.protocol.ProtocolException.EmailNotRegisteredException;
@@ -79,7 +80,9 @@ public class DatabaseConnector {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
-						"SELECT u.id id, u.emailAddress emailAddress, u.nickname nickname, ur.note note FROM Users u LEFT JOIN userRelationships ur ON ur.userA=ur.userB WHERE u.emailAddress = ?");) {
+						"SELECT u.id id, u.emailAddress emailAddress, u.nickname nickname, ur.note note FROM Users u "
+								+ "LEFT JOIN userRelationships ur ON ur.userA=ur.userB "
+								+ "WHERE u.emailAddress = ?");) {
 			stmt.setString(1, user.getEmailAddress());
 			ResultSet rs = stmt.executeQuery();
 			rs.first();
@@ -88,7 +91,7 @@ public class DatabaseConnector {
 			String nickname = rs.getString("nickname");
 			String note = rs.getString("note");
 
-			return new User(id, emailAddress, nickname, null, note);
+			return new User(id, emailAddress, nickname, null, note, null, null);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException();
@@ -164,8 +167,9 @@ public class DatabaseConnector {
 	public Channel[] getChannels(User user) throws InternalServerErrorException {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
-				PreparedStatement stmt = c.prepareStatement(
-						"SELECT c.id id, c.type type, c.name name FROM Channels c INNER JOIN channelMembers cm ON cm.channel = c.id INNER JOIN Users u ON u.id = cm.user WHERE u.id = ?")) {
+				PreparedStatement stmt = c.prepareStatement("SELECT c.id id, c.type type, c.name name FROM Channels c "
+						+ "INNER JOIN channelMembers cm ON cm.channel = c.id "
+						+ "INNER JOIN Users u ON u.id = cm.user WHERE u.id = ?")) {
 			stmt.setInt(1, user.getId());
 			ResultSet rs = stmt.executeQuery();
 
@@ -187,9 +191,37 @@ public class DatabaseConnector {
 
 	}
 
-	public User[] getChannelMembers(Channel channel) {
-		// TODO Auto-generated method stub
-		return null;
+	// TODO check if user is member/channel is publicgroup
+	public User[] getChannelMembers(User user, Channel channel) throws InternalServerErrorException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"SELECT u.id id, u.nickname nickname, ur.note note, ur.type type, cm.isAdmin isAdmin FROM Users u "
+								+ "INNER JOIN channelMembers cm ON cm.user = u.id "
+								+ "INNER JOIN userRelationships ur ON ur.userB = u.id "
+								+ "WHERE cm.channel = ? AND ur.userA = ?")) {
+			stmt.setInt(1, channel.getId());
+			stmt.setInt(2, user.getId());
+			ResultSet rs = stmt.executeQuery();
+
+			ArrayList<User> userList = new ArrayList<>();
+
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				String nickname = rs.getString("nickname");
+				String note = rs.getString("note");
+				RelationshipType type = RelationshipType.valueOf(rs.getString("type"));
+				boolean isAdmin = rs.getBoolean("isAdmin");
+				userList.add(new User(id, null, nickname, null, note, type, isAdmin));
+			}
+
+			return userList.toArray(new User[userList.size()]);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException();
+		}
+
 	}
 
 	public User getUser(User user) {

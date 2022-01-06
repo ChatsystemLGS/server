@@ -32,7 +32,7 @@ public interface Protocol {
 
 	Channel[] getChannels() throws InternalServerErrorException;
 
-	User[] getChannelMembers(int channelId) throws NotMemberOfChannelException;
+	User[] getChannelMembers(int channelId) throws InternalServerErrorException, NotMemberOfChannelException;
 
 	User getUser(int id) throws UserNotFoundException;
 

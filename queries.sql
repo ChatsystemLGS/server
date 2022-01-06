@@ -44,7 +44,7 @@ INNER JOIN Users u ON u.id = cm.user
 WHERE u.id = [userId];
 
 -- getChannelMembers
-SELECT u.id, u.nickname, ur.note, ur.type, cm.isAdmin FROM Users u
+SELECT u.id id, u.nickname nickname, ur.note note, ur.type type, cm.isAdmin isAdmin FROM Users u
 INNER JOIN channelMembers cm ON cm.user = u.id
 INNER JOIN userRelationships ur ON ur.userB = u.id
 WHERE cm.channel = [channelId] AND ur.userA = [userId];

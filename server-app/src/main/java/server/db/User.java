@@ -4,20 +4,23 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
-public class User {
+public class User extends TransmittableObject {
 
 	private Integer id;
 	private String emailAddress;
 	private String nickname;
 	private String passwordHash;
 	private String note;
+	private RelationshipType type;
+	private Boolean isAdmin;
 
 	// TODO
 	// check password requirements
 	// check email valid format
 	// change hashing algorithm to bcrypt and add salt
 
-	public User(Integer id, String emailAddress, String nickname, String password, String note) {
+	public User(Integer id, String emailAddress, String nickname, String password, String note, RelationshipType type,
+			Boolean isAdmin) {
 		this.id = id;
 		this.emailAddress = emailAddress;
 		this.nickname = nickname;
@@ -26,6 +29,8 @@ public class User {
 		else
 			passwordHash = null;
 		this.note = note;
+		this.type = type;
+		this.isAdmin = isAdmin;
 	}
 
 	public int getId() {
@@ -48,6 +53,14 @@ public class User {
 		return note;
 	}
 
+	public RelationshipType getType() {
+		return type;
+	}
+
+	public boolean isAdmin() {
+		return isAdmin;
+	}
+
 	private String hashPassword(String password) {
 		MessageDigest md = null;
 
@@ -58,6 +71,15 @@ public class User {
 		}
 
 		return Base64.getEncoder().encodeToString(md.digest(password.getBytes()));
+	}
+
+	@Override
+	public String toString() {
+		return objsToString(id, emailAddress, nickname, passwordHash, note, type, isAdmin);
+	}
+
+	public enum RelationshipType {
+		FRIEND, BLOCKED
 	}
 
 }
