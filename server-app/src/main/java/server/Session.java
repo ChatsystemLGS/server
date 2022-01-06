@@ -3,25 +3,19 @@ package server;
 import java.sql.Date;
 import java.util.Arrays;
 
+import server.ProtocolException.InternalServerErrorException;
+import server.ProtocolException.InvalidParameterException;
+import server.ProtocolException.MessageTooLongException;
+import server.ProtocolException.Status;
+import server.ProtocolException.TooManyMessagesException;
 import server.db.Channel;
 import server.db.Message;
+import server.db.Message.DataType;
 import server.db.User;
-import server.protocol.Protocol;
-import server.protocol.ProtocolException;
-import server.protocol.ProtocolException.ChannelNotFoundException;
-import server.protocol.ProtocolException.DmAlreadyExistsException;
-import server.protocol.ProtocolException.EmailAlreadyRegisteredException;
-import server.protocol.ProtocolException.EmailNotRegisteredException;
-import server.protocol.ProtocolException.InternalServerErrorException;
-import server.protocol.ProtocolException.InvalidParameterException;
-import server.protocol.ProtocolException.MessageTooLongException;
-import server.protocol.ProtocolException.NotMemberOfChannelException;
-import server.protocol.ProtocolException.PasswordInvalidException;
-import server.protocol.ProtocolException.PasswordRequirementNotMetException;
-import server.protocol.ProtocolException.TooManyMessagesException;
-import server.protocol.ProtocolException.UserNotFoundException;
 
-public class Session implements Protocol {
+public class Session {
+
+	static final String PROTOCOL_VERSION = "0.0.0";
 
 	private final Server server;
 
@@ -66,71 +60,73 @@ public class Session implements Protocol {
 			return switch (cmd) {
 			case ADDFRIEND -> {
 				try {
-					addFriend(getInt(args, 1));
+					server.DBC.addFriend(user, new User(getInt(args, 1), null, null, null, null, null, null));
 				} catch (InvalidParameterException e) {
-					addFriend(args[1]);
+					server.DBC.addFriend(user, new User(null, args[1], null, null, null, null, null));
 				}
 				yield response();
 			}
 			case GETCHANNELMEMBERS -> {
-				User[] users = getChannelMembers(getInt(args, 1));
+				User[] users = server.DBC.getChannelMembers(user, new Channel(getInt(args, 1), null, null));
 				yield response(users);
 			}
 			case GETCHANNELS -> {
-				Channel[] channels = getChannels();
+				Channel[] channels = server.DBC.getChannels(user);
 				yield response(channels);
 			}
 			case GETFRIENDS -> {
-				User[] users = getFriends();
+				User[] users = server.DBC.getFriends(user);
 				yield response(users);
 			}
 			case GETPUBLICGROUPS -> {
-				Channel[] channels = getPublicGroups();
-				System.out.println(channels.length);
+				Channel[] channels = server.DBC.getPublicGroups();
 				yield response(channels);
 			}
 			case GETUSER -> {
 				User user;
 				try {
-					user = getUser(getInt(args, 1));
+					user = server.DBC.getUser(new User(getInt(args, 1), null, null, null, null, null, null));
 				} catch (InvalidParameterException e) {
-					user = getUser(args[1]);
+					user = server.DBC.getUser(new User(null, args[1], null, null, null, null, null));
 				}
 				yield response(user);
 			}
 			case JOINGROUP -> {
-				joinGroup(getInt(args, 1));
+				server.DBC.joinGroup(user, new Channel(getInt(args, 1), null, null));
 				yield response();
 			}
 			case LOGIN -> {
-				login(args[1], args[2]);
+				user = server.DBC.login(new User(null, args[1], null, args[2], null, null, null));
+				state = State.AUTHENTICATED;
 				yield response();
 			}
 			case QUIT -> {
-				quit();
+				state = State.DISCONNECTED;
 				yield response();
 			}
 			case RECEIVEMESSAGES -> {
-				Message[] messages = receiveMessages(Integer.parseInt(args[1]), getDate(args, 2), getDate(args, 3));
+				Message[] messages = server.DBC.receiveMessages(user,
+						new Channel(Integer.parseInt(args[1]), null, null), getDate(args, 2), getDate(args, 3));
 				yield response(messages);
 			}
 			case REGISTER -> {
-				register(args[1], args[2], args[3]);
+				server.DBC.addUser(new User(null, args[1], args[2], args[3], null, null, null));
 				yield response();
 			}
 			case CREATEDM -> {
-				int channelId = createDm(getInt(args, 1));
+				int channelId = server.DBC.createDm(user,
+						new User(getInt(args, 1), null, null, null, null, null, null));
 				yield response(channelId);
 			}
 			case SENDMESSAGE -> {
 				DataType dataType = getEnum(args, 3, DataType.class);
-				sendMessage(getInt(args, 1), args[2], dataType);
+				server.DBC.sendMessage(user, new Channel(getInt(args, 1), null, null), new Message(args[2], dataType));
 				yield response();
 			}
 			};
 
 		} catch (InternalServerErrorException e) {
-			quit();
+			state = State.DISCONNECTED;
 			return response(e.getStatus());
 		} catch (MessageTooLongException e) {
 			return response(e.getStatus(), e.getMaxMessageSize());
@@ -172,6 +168,7 @@ public class Session implements Protocol {
 
 	// replace by response(Status status, Object...) -> iterate over array, call
 	// Array.toString() if obj is array)...
+	@SuppressWarnings("unused")
 	private String response(Status status, Object retVal1, Message[] retVal2) {
 		return String.format("%s %s %s", status, retVal1, Arrays.toString(retVal2));
 	}
@@ -208,92 +205,65 @@ public class Session implements Protocol {
 		return state;
 	}
 
-	@Override
-	public void register(String emailAddress, String nickname, String password)
-			throws InternalServerErrorException, EmailAlreadyRegisteredException, PasswordRequirementNotMetException {
-		server.DBC.addUser(new User(null, emailAddress, nickname, password, null, null, null));
-	}
-
-	@Override
-	public void login(String emailAddress, String password)
-			throws InternalServerErrorException, EmailNotRegisteredException, PasswordInvalidException {
-
-		User u = new User(null, emailAddress, null, password, null, null, null);
-
-		user = server.DBC.login(u);
-		state = State.AUTHENTICATED;
-
-	}
-
-	@Override
-	public Channel[] getPublicGroups() throws InternalServerErrorException {
-		return server.DBC.getPublicGroups();
-	}
-
-	@Override
-	public void joinGroup(int channelId) throws InternalServerErrorException, ChannelNotFoundException { // ChannelNotPublicException?
-		server.DBC.joinGroup(user, new Channel(channelId, null, null));
-	}
-
-	@Override
-	public Channel[] getChannels() throws InternalServerErrorException {
-		return server.DBC.getChannels(user);
-	}
-
-	@Override
-	public User[] getChannelMembers(int channelId) throws InternalServerErrorException, NotMemberOfChannelException { // ChannelNotFoundException?
-		return server.DBC.getChannelMembers(user, new Channel(channelId, null, null));
-	}
-
-	@Override
-	public User getUser(int id) throws UserNotFoundException {
-		return server.DBC.getUser(new User(id, null, null, null, null, null, null));
-	}
-
-	@Override
-	public User getUser(String emailAddress) throws UserNotFoundException {
-		return server.DBC.getUser(new User(null, emailAddress, null, null, null, null, null));
-	}
-
-	@Override
-	public void addFriend(int id) throws UserNotFoundException {
-		server.DBC.addFriend(user, new User(id, null, null, null, null, null, null));
-	}
-
-	@Override
-	public void addFriend(String emailAddress) throws UserNotFoundException {
-		server.DBC.addFriend(user, new User(null, emailAddress, null, null, null, null, null));
-	}
-
-	@Override
-	public User[] getFriends() {
-		return server.DBC.getFriends(user);
-	}
-
-	@Override
-	public void sendMessage(int channelId, String data, DataType dataType)
-			throws NotMemberOfChannelException, MessageTooLongException {
-		server.DBC.sendMessage(user, new Channel(channelId, null, null), new Message(data, dataType));
-	}
-
-	@Override
-	public int createDm(int id) throws UserNotFoundException, DmAlreadyExistsException {
-		return server.DBC.createDm(user, new User(id, null, null, null, null, null, null));
-	}
-
-	@Override
-	public Message[] receiveMessages(int channelId, Date tFrom, Date tUntil)
-			throws NotMemberOfChannelException, TooManyMessagesException {
-		return server.DBC.receiveMessages(user, new Channel(channelId, null, null), tFrom, tUntil);
-	}
-
-	@Override
-	public void quit() {
-		state = State.DISCONNECTED;
-	}
-
 	public String greet() {
 		return response(Status.OK, PROTOCOL_VERSION);
+	}
+
+	enum State {
+
+		CONNECTED(null), AUTHENTICATED(State.CONNECTED), DISCONNECTED(State.CONNECTED);
+
+		private final State parentState;
+
+		State(State parentState) {
+			this.parentState = parentState;
+		}
+
+		// returns parent State or null if it is the default State
+		public State getParentState() {
+			return parentState;
+		}
+
+		public boolean hasParent(State state) {
+
+			if (state == null)
+				throw new IllegalArgumentException();
+
+			if (parentState == null)
+				return false;
+
+			if (parentState == state)
+				return true;
+			else
+				return parentState.hasParent(state);
+		}
+
+	}
+
+	enum Command {
+
+		REGISTER(State.CONNECTED, 3), LOGIN(State.CONNECTED, 2), GETPUBLICGROUPS(State.AUTHENTICATED, 0),
+		JOINGROUP(State.AUTHENTICATED, 1), GETCHANNELS(State.AUTHENTICATED, 0),
+		GETCHANNELMEMBERS(State.AUTHENTICATED, 1), GETUSER(State.AUTHENTICATED, 1), ADDFRIEND(State.AUTHENTICATED, 1),
+		GETFRIENDS(State.AUTHENTICATED, 0), SENDMESSAGE(State.AUTHENTICATED, 3), CREATEDM(State.AUTHENTICATED, 1),
+		RECEIVEMESSAGES(State.AUTHENTICATED, 3), QUIT(State.CONNECTED, 0);
+
+		private final State requiredState;
+		private final int numArgs;
+
+		Command(State requiredState, int numArgs) {
+			this.requiredState = requiredState;
+			this.numArgs = numArgs;
+		}
+
+		public State getRequiredState() {
+			return requiredState;
+		}
+
+		public int getNumArgs() {
+			return numArgs;
+		}
+
 	}
 
 }

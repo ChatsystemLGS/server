@@ -1,9 +1,8 @@
-package server.protocol;
+package server;
 
 import java.sql.Date;
 
 import server.db.Message;
-import server.protocol.Protocol.Status;
 
 public abstract class ProtocolException extends Exception {
 
@@ -30,7 +29,7 @@ public abstract class ProtocolException extends Exception {
 		private final int index;
 
 		public InvalidParameterException(int index) {
-			super(Protocol.Status.INVALID_PARAMETER);
+			super(Status.INVALID_PARAMETER);
 			this.index = index;
 		}
 
@@ -48,7 +47,7 @@ public abstract class ProtocolException extends Exception {
 		private static final long serialVersionUID = 4237922086005335690L;
 
 		public EmailAlreadyRegisteredException() {
-			super(Protocol.Status.EMAIL_ALREADY_REGISTERED);
+			super(Status.EMAIL_ALREADY_REGISTERED);
 		}
 
 	}
@@ -61,7 +60,7 @@ public abstract class ProtocolException extends Exception {
 		private static final long serialVersionUID = -1035791352733735378L;
 
 		public PasswordRequirementNotMetException() {
-			super(Protocol.Status.PASSWORD_REQ_NOT_MET);
+			super(Status.PASSWORD_REQ_NOT_MET);
 		}
 
 	}
@@ -74,7 +73,7 @@ public abstract class ProtocolException extends Exception {
 		private static final long serialVersionUID = -6532826769572086272L;
 
 		public EmailNotRegisteredException() {
-			super(Protocol.Status.EMAIL_NOT_REGISTERED);
+			super(Status.EMAIL_NOT_REGISTERED);
 		}
 
 	}
@@ -87,7 +86,7 @@ public abstract class ProtocolException extends Exception {
 		private static final long serialVersionUID = -1832448351451110039L;
 
 		public PasswordInvalidException() {
-			super(Protocol.Status.PASSWORD_INVALID);
+			super(Status.PASSWORD_INVALID);
 		}
 
 	}
@@ -100,7 +99,7 @@ public abstract class ProtocolException extends Exception {
 		private static final long serialVersionUID = 2170636056686421482L;
 
 		public NotMemberOfChannelException() {
-			super(Protocol.Status.NOT_MEMBER_OF_CHANNEL);
+			super(Status.NOT_MEMBER_OF_CHANNEL);
 		}
 
 	}
@@ -114,7 +113,7 @@ public abstract class ProtocolException extends Exception {
 		private final int MAX_MESSAGE_SIZE;
 
 		public MessageTooLongException(int MAX_MESSAGE_SIZE) {
-			super(Protocol.Status.MESSAGE_TOO_LONG);
+			super(Status.MESSAGE_TOO_LONG);
 			this.MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
 		}
 
@@ -134,7 +133,7 @@ public abstract class ProtocolException extends Exception {
 		private final Message[] messages;
 
 		public TooManyMessagesException(Date lastMessageTime, Message[] messages) {
-			super(Protocol.Status.TOO_MANY_MESSAGES);
+			super(Status.TOO_MANY_MESSAGES);
 			this.lastMessageTime = lastMessageTime;
 			this.messages = messages;
 		}
@@ -157,7 +156,7 @@ public abstract class ProtocolException extends Exception {
 		private static final long serialVersionUID = 6705554276488394002L;
 
 		public ChannelNotFoundException() {
-			super(Protocol.Status.CHANNEL_NOT_FOUND);
+			super(Status.CHANNEL_NOT_FOUND);
 		}
 
 	}
@@ -170,7 +169,7 @@ public abstract class ProtocolException extends Exception {
 		private static final long serialVersionUID = 6940922235095667798L;
 
 		public UserNotFoundException() {
-			super(Protocol.Status.USER_NOT_FOUND);
+			super(Status.USER_NOT_FOUND);
 		}
 
 	}
@@ -184,7 +183,7 @@ public abstract class ProtocolException extends Exception {
 		private final int channelId;
 
 		public DmAlreadyExistsException(int channelId) {
-			super(Protocol.Status.DM_ALREADY_EXISTS);
+			super(Status.DM_ALREADY_EXISTS);
 			this.channelId = channelId;
 		}
 
@@ -202,7 +201,21 @@ public abstract class ProtocolException extends Exception {
 		private static final long serialVersionUID = -9199244919909050026L;
 
 		public InternalServerErrorException() {
-			super(Protocol.Status.INTERNAL_SERVER_ERROR);
+			super(Status.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+	
+	public enum Status {
+
+		OK, NOT_ENOUGH_PARAMETERS, TOO_MANY_PARAMETERS, INVALID_PARAMETER, COMMAND_NOT_FOUND, INTERNAL_SERVER_ERROR,
+		AUTHENTICATION_REQUIRED, EMAIL_ALREADY_REGISTERED, PASSWORD_REQ_NOT_MET, EMAIL_NOT_REGISTERED, PASSWORD_INVALID,
+		NOT_MEMBER_OF_CHANNEL, MESSAGE_TOO_LONG, TOO_MANY_MESSAGES, CHANNEL_NOT_FOUND, USER_NOT_FOUND,
+		DM_ALREADY_EXISTS;
+
+		@Override
+		public String toString() {
+			return this.name();
 		}
 
 	}

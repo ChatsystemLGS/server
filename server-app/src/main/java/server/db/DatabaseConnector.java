@@ -8,13 +8,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import server.ProtocolException.ChannelNotFoundException;
+import server.ProtocolException.EmailAlreadyRegisteredException;
+import server.ProtocolException.EmailNotRegisteredException;
+import server.ProtocolException.InternalServerErrorException;
+import server.ProtocolException.MessageTooLongException;
+import server.ProtocolException.PasswordInvalidException;
+import server.ProtocolException.TooManyMessagesException;
 import server.db.Channel.ChannelType;
 import server.db.User.RelationshipType;
-import server.protocol.ProtocolException.ChannelNotFoundException;
-import server.protocol.ProtocolException.EmailAlreadyRegisteredException;
-import server.protocol.ProtocolException.EmailNotRegisteredException;
-import server.protocol.ProtocolException.InternalServerErrorException;
-import server.protocol.ProtocolException.PasswordInvalidException;
 import server.simplelogger.SimpleLogger;
 import server.simplelogger.SimpleLogger.LogLevel;
 
@@ -239,7 +241,7 @@ public class DatabaseConnector {
 		return null;
 	}
 
-	public void sendMessage(User user, Channel channel, Message message) {
+	public void sendMessage(User user, Channel channel, Message message) throws MessageTooLongException {
 		// TODO Auto-generated method stub
 
 	}
@@ -249,7 +251,7 @@ public class DatabaseConnector {
 		return 0;
 	}
 
-	public Message[] receiveMessages(User user, Channel channel, Date tFrom, Date tUntil) {
+	public Message[] receiveMessages(User user, Channel channel, Date tFrom, Date tUntil) throws TooManyMessagesException {
 		// TODO Auto-generated method stub
 		return null;
 	}
