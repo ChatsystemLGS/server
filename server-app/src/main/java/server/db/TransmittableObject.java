@@ -1,6 +1,7 @@
 package server.db;
 
 import java.util.Arrays;
+import java.util.Base64;
 
 public abstract class TransmittableObject {
 
@@ -25,6 +26,14 @@ public abstract class TransmittableObject {
 		s += filteredAttributes[filteredAttributes.length - 1].toString();
 
 		return s;
+	}
+
+	public static String toBase64String(byte[] data) {
+		return Base64.getEncoder().encodeToString(data);
+	}
+
+	public static byte[] fromBase64String(String data) {
+		return Base64.getDecoder().decode((data).getBytes());
 	}
 
 }

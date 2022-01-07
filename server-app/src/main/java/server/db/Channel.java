@@ -10,7 +10,7 @@ public class Channel extends TransmittableObject {
 		registerAttributes(id, type, name);
 	}
 	
-	public Channel withId(Integer id) {
+	public Channel withId(int id) {
 		this.id.set(id);
 		return this;
 	}
@@ -25,7 +25,7 @@ public class Channel extends TransmittableObject {
 		return this;
 	}
 
-	public Integer getId() {
+	public int getId() {
 		return id.getValue();
 	}
 

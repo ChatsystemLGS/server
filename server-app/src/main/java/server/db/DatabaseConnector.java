@@ -1,18 +1,19 @@
 package server.db;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import server.ProtocolException.ChannelNotFoundException;
 import server.ProtocolException.EmailAlreadyRegisteredException;
 import server.ProtocolException.EmailNotRegisteredException;
 import server.ProtocolException.MessageTooLongException;
+import server.ProtocolException.NotMemberOfChannelException;
 import server.ProtocolException.PasswordInvalidException;
 import server.ProtocolException.TooManyMessagesException;
 import server.ProtocolException.UserNotFoundException;
@@ -21,6 +22,7 @@ import server.db.User.RelationshipType;
 import server.simplelogger.SimpleLogger;
 import server.simplelogger.SimpleLogger.LogLevel;
 
+// TODO ids should be stored in long (serial/bigint <=> long)
 public class DatabaseConnector {
 
 	private final String connectionUrl;
@@ -166,8 +168,43 @@ public class DatabaseConnector {
 
 	}
 
-	// TODO check if user is member/channel is publicgroup
-	public User[] getChannelMembers(User user, Channel channel) throws SQLException {
+	private boolean isChannelMember(User user, Channel channel) throws SQLException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"SELECT EXISTS (SELECT * FROM channelMembers cm WHERE cm.user = ? AND cm.channel = ?) isMember")) {
+			stmt.setInt(1, user.getId());
+			stmt.setInt(2, channel.getId());
+			ResultSet rs = stmt.executeQuery();
+			rs.first();
+			return rs.getBoolean("isMember");
+		}
+
+	}
+
+	private ChannelType getChannelType(Channel channel) throws SQLException, ChannelNotFoundException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement("SELECT c.type type FROM Channels c WHERE c.id = ?")) {
+			stmt.setInt(1, channel.getId());
+			ResultSet rs = stmt.executeQuery();
+			rs.first();
+
+			String typeString = rs.getString("type");
+			if (typeString == null)
+				throw new ChannelNotFoundException();
+
+			return ChannelType.valueOf(typeString);
+		}
+
+	}
+
+	public User[] getChannelMembers(User user, Channel channel)
+			throws SQLException, NotMemberOfChannelException, ChannelNotFoundException {
+
+		if (!isChannelMember(user, channel))
+			if (getChannelType(channel) != ChannelType.PUBLIC_GROUP)
+				throw new NotMemberOfChannelException();
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
@@ -204,6 +241,7 @@ public class DatabaseConnector {
 
 	}
 
+	// TODO even if userA == userB we should return the user
 	public User getUserById(User userA, User userB) throws SQLException, UserNotFoundException {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
@@ -264,6 +302,7 @@ public class DatabaseConnector {
 						+ "VALUES (?, ?, 'FRIEND') ON DUPLICATE KEY UPDATE type = 'FRIEND'")) {
 			stmt.setInt(1, user.getId());
 			stmt.setInt(2, friend.getId());
+			stmt.executeUpdate();
 		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new UserNotFoundException();
 		}
@@ -294,9 +333,25 @@ public class DatabaseConnector {
 
 	}
 
-	public void sendMessage(User user, Channel channel, Message message) throws MessageTooLongException {
-		// TODO Auto-generated method stub
+	public void sendMessage(User user, Channel channel, Message message)
+			throws SQLException, NotMemberOfChannelException, MessageTooLongException {
 
+		if (!isChannelMember(user, channel))
+			throw new NotMemberOfChannelException();
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c
+						.prepareStatement("INSERT INTO Messages (channel, author, timestamp, data, dataType) "
+								+ "VALUES (?, ?, ?, ?, ?)")) {
+			stmt.setInt(1, channel.getId());
+			stmt.setInt(2, user.getId());
+			stmt.setTimestamp(3, message.getTimestamp()); // check if timestamp is within reasonable
+																	// range/set timestamp to current time
+			stmt.setBytes(4, message.getData());
+			stmt.setString(5, message.getDataType().toString());
+
+			stmt.executeUpdate();
+		}
 	}
 
 	public int createDm(User user, User userB) {
@@ -304,7 +359,7 @@ public class DatabaseConnector {
 		return 0;
 	}
 
-	public Message[] receiveMessages(User user, Channel channel, Date tFrom, Date tUntil)
+	public Message[] receiveMessages(User user, Channel channel, Timestamp tFrom, Timestamp tUntil)
 			throws TooManyMessagesException {
 		// TODO Auto-generated method stub
 		return null;

@@ -1,7 +1,5 @@
 package server.db;
 
-import java.util.Base64;
-
 public class Attr<T> {
 
 	private T value = null;
@@ -39,7 +37,7 @@ public class Attr<T> {
 			if (((String) value).contentEquals(""))
 				return "-";
 
-			return Base64.getEncoder().encodeToString(((String) value).getBytes());
+			return TransmittableObject.toBase64String(((String) value).getBytes());
 		}
 
 		return value.toString();

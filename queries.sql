@@ -10,6 +10,12 @@ INSERT INTO Users (
 );
 SELECT LAST_INSERT_ID();
 
+-- isPublicChannel
+SELECT c.type type FROM Channels c WHERE c.id = [channelId];
+
+-- isChannelMember
+SELECT EXISTS (SELECT * FROM channelMembers cm WHERE cm.user = [userId] AND cm.channel = [chnnalId]) isMember;
+
 -- checkAuth
 SELECT (
     SELECT u.passwordHash FROM Users u WHERE u.emailAddress = [email]

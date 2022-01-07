@@ -1,7 +1,8 @@
 package server;
 
-import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Arrays;
 
 import server.ProtocolException.InternalServerErrorException;
@@ -12,6 +13,7 @@ import server.ProtocolException.TooManyMessagesException;
 import server.db.Channel;
 import server.db.Message;
 import server.db.Message.DataType;
+import server.db.TransmittableObject;
 import server.db.User;
 
 public class Session {
@@ -100,7 +102,8 @@ public class Session {
 					yield response();
 				}
 				case LOGIN -> {
-					user = server.DBC.login(new User().withEmailAddress(args[1]).withPassword(args[2]));
+					user = server.DBC.login(new User().withEmailAddress(getBase64String(args, 1))
+							.withPassword(getBase64String(args, 2)));
 					state = State.AUTHENTICATED;
 					yield response();
 				}
@@ -110,12 +113,12 @@ public class Session {
 				}
 				case RECEIVEMESSAGES -> {
 					Message[] messages = server.DBC.receiveMessages(user, new Channel().withId(getInt(args, 1)),
-							getDate(args, 2), getDate(args, 3));
+							getTimestamp(args, 2), getTimestamp(args, 3));
 					yield response(messages);
 				}
 				case REGISTER -> {
-					server.DBC
-							.addUser(new User().withEmailAddress(args[1]).withNickname(args[2]).withPassword(args[3]));
+					server.DBC.addUser(new User().withEmailAddress(getBase64String(args, 1))
+							.withNickname(getBase64String(args, 2)).withPassword(getBase64String(args, 3)));
 					yield response();
 				}
 				case CREATEDM -> {
@@ -124,7 +127,9 @@ public class Session {
 				}
 				case SENDMESSAGE -> {
 					DataType dataType = getEnum(args, 3, DataType.class);
-					server.DBC.sendMessage(user, new Channel().withId(getInt(args, 1)), new Message(args[2], dataType));
+					server.DBC.sendMessage(user, new Channel().withId(getInt(args, 1)),
+							new Message().withData(getBase64Bytes(args, 2)).withDataType(dataType)
+									.withTimestamp(Timestamp.from(Instant.now())));
 					yield response();
 				}
 				};
@@ -167,9 +172,25 @@ public class Session {
 		}
 	}
 
-	private Date getDate(String[] args, int i) throws InvalidParameterException {
+	private Timestamp getTimestamp(String[] args, int i) throws InvalidParameterException {
 		try {
-			return Date.valueOf(args[i]);
+			return new Timestamp(getInt(args, i));
+		} catch (IllegalArgumentException e) {
+			throw new InvalidParameterException(i);
+		}
+	}
+
+	private String getBase64String(String[] args, int i) throws InvalidParameterException {
+		try {
+			return new String(TransmittableObject.fromBase64String(args[i]));
+		} catch (IllegalArgumentException e) {
+			throw new InvalidParameterException(i);
+		}
+	}
+
+	private byte[] getBase64Bytes(String[] args, int i) throws InvalidParameterException {
+		try {
+			return TransmittableObject.fromBase64String(args[i]);
 		} catch (IllegalArgumentException e) {
 			throw new InvalidParameterException(i);
 		}

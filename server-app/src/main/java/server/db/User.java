@@ -73,7 +73,7 @@ public class User extends TransmittableObject {
 		return this;
 	}
 
-	public Integer getId() {
+	public int getId() {
 		return id.getValue();
 	}
 
@@ -97,7 +97,7 @@ public class User extends TransmittableObject {
 		return type.getValue();
 	}
 
-	public Boolean isAdmin() {
+	public boolean isAdmin() {
 		return isAdmin.getValue();
 	}
 
