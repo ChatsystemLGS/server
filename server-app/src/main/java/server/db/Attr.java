@@ -28,7 +28,17 @@ public class Attr<T> {
 	public String toString() {
 
 		if (!isSet())
-			return "";
+			return "-";
+
+		if (value == null)
+			return "null";
+
+		return value.toString();
+	}
+
+	public String transmittableString() {
+		if (!isSet())
+			return "-";
 
 		if (value == null)
 			return "null";

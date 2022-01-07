@@ -29,17 +29,17 @@ public class Message extends TransmittableObject {
 		this.author.set(id);
 		return this;
 	}
-	
+
 	public Message withTimestamp(Timestamp timestamp) {
 		this.timestamp.set(timestamp);
 		return this;
 	}
-	
+
 	public Message withData(byte[] data) {
 		this.data.set(data);
 		return this;
 	}
-	
+
 	public Message withDataType(DataType dataType) {
 		this.dataType.set(dataType);
 		return this;
@@ -48,23 +48,23 @@ public class Message extends TransmittableObject {
 	public int getId() {
 		return id.getValue();
 	}
-	
+
 	public int getChannel() {
 		return channel.getValue();
 	}
-	
+
 	public int getAuthor() {
 		return author.getValue();
 	}
-	
+
 	public Timestamp getTimestamp() {
 		return timestamp.getValue();
 	}
-	
+
 	public byte[] getData() {
 		return data.getValue();
 	}
-	
+
 	public DataType getDataType() {
 		return dataType.getValue();
 	}

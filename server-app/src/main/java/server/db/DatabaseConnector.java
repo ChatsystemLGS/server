@@ -49,7 +49,19 @@ public class DatabaseConnector {
 			if (stmt.executeUpdate() == 0)
 				throw new EmailAlreadyRegisteredException();
 		}
+		debugLog(user, "added user", user);
+	}
 
+	private void debugLog(User user, String action, TransmittableObject o, Channel c) {
+		SimpleLogger.logf(LogLevel.DEBUG, "user (%s):(%s) : %s [%s] ", user, action, o);
+	}
+
+	private void debugLog(User user, String action, TransmittableObject o) {
+		SimpleLogger.logf(LogLevel.DEBUG, "user (%s) : %s [%s]", user, action, o);
+	}
+
+	private void debugLog(User user, String action) {
+		SimpleLogger.logf(LogLevel.DEBUG, "user (%s) : %s", user, action);
 	}
 
 	private boolean checkAuth(User user) throws SQLException, EmailNotRegisteredException {
@@ -87,9 +99,9 @@ public class DatabaseConnector {
 			String nickname = rs.getString("nickname");
 			String note = rs.getString("note");
 
+			debugLog(user, "logged in");
 			return new User().withId(id).withEmailAddress(emailAddress).withNickname(nickname).withNote(note);
 		}
-
 	}
 
 	public Channel[] getPublicGroups() throws SQLException {
@@ -142,7 +154,7 @@ public class DatabaseConnector {
 			if (stmt.executeUpdate() == 0)
 				; // TODO already member of group -> exception
 		}
-
+		debugLog(user, "joined", channel);
 	}
 
 	public Channel[] getChannels(User user) throws SQLException {
@@ -306,7 +318,7 @@ public class DatabaseConnector {
 		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new UserNotFoundException();
 		}
-
+		debugLog(user, "added friend", friend);
 	}
 
 	public User[] getFriends(User user) throws SQLException {
@@ -346,17 +358,18 @@ public class DatabaseConnector {
 			stmt.setInt(1, channel.getId());
 			stmt.setInt(2, user.getId());
 			stmt.setTimestamp(3, message.getTimestamp()); // check if timestamp is within reasonable
-																	// range/set timestamp to current time
+															// range/set timestamp to current time
 			stmt.setBytes(4, message.getData());
 			stmt.setString(5, message.getDataType().toString());
 
 			stmt.executeUpdate();
 		}
+		debugLog(user, "sent message", message, channel);
 	}
 
-	public int createDm(User user, User userB) {
+	public void createDm(User user, User userB) {
 		// TODO Auto-generated method stub
-		return 0;
+
 	}
 
 	public Message[] receiveMessages(User user, Channel channel, Timestamp tFrom, Timestamp tUntil)

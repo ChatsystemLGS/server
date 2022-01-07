@@ -3,7 +3,6 @@ package server;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Arrays;
 
 import server.ProtocolException.InternalServerErrorException;
 import server.ProtocolException.InvalidParameterException;
@@ -73,19 +72,24 @@ public class Session {
 					yield response();
 				}
 				case GETCHANNELMEMBERS -> {
+
 					User[] users = server.DBC.getChannelMembers(user, new Channel().withId(getInt(args, 1)));
+
 					yield response(users);
 				}
 				case GETCHANNELS -> {
 					Channel[] channels = server.DBC.getChannels(user);
+
 					yield response(channels);
 				}
 				case GETFRIENDS -> {
 					User[] users = server.DBC.getFriends(user);
+
 					yield response(users);
 				}
 				case GETPUBLICGROUPS -> {
 					Channel[] channels = server.DBC.getPublicGroups();
+
 					yield response(channels);
 				}
 				case GETUSER -> {
@@ -95,41 +99,53 @@ public class Session {
 					} catch (InvalidParameterException e) {
 						user = server.DBC.getUserByEmail(this.user, new User().withEmailAddress(args[1]));
 					}
+
 					yield response(user);
 				}
 				case JOINGROUP -> {
 					server.DBC.joinGroup(user, new Channel().withId(getInt(args, 1)));
+
 					yield response();
+
 				}
 				case LOGIN -> {
 					user = server.DBC.login(new User().withEmailAddress(getBase64String(args, 1))
 							.withPassword(getBase64String(args, 2)));
 					state = State.AUTHENTICATED;
+
 					yield response();
+
 				}
 				case QUIT -> {
 					state = State.DISCONNECTED;
+
 					yield response();
 				}
 				case RECEIVEMESSAGES -> {
+
 					Message[] messages = server.DBC.receiveMessages(user, new Channel().withId(getInt(args, 1)),
 							getTimestamp(args, 2), getTimestamp(args, 3));
+
 					yield response(messages);
 				}
 				case REGISTER -> {
 					server.DBC.addUser(new User().withEmailAddress(getBase64String(args, 1))
 							.withNickname(getBase64String(args, 2)).withPassword(getBase64String(args, 3)));
+
 					yield response();
 				}
 				case CREATEDM -> {
-					int channelId = server.DBC.createDm(user, new User().withId(getInt(args, 1)));
-					yield response(channelId);
+					server.DBC.createDm(user, new User().withId(getInt(args, 1)));
+
+					yield response();
 				}
 				case SENDMESSAGE -> {
+
 					DataType dataType = getEnum(args, 3, DataType.class);
 					server.DBC.sendMessage(user, new Channel().withId(getInt(args, 1)),
 							new Message().withData(getBase64Bytes(args, 2)).withDataType(dataType)
 									.withTimestamp(Timestamp.from(Instant.now())));
+
 					yield response();
 				}
 				};
@@ -140,7 +156,7 @@ public class Session {
 			}
 
 		} catch (InternalServerErrorException e) {
-			state = State.DISCONNECTED;
+			disconnect();
 			return response(e.getStatus());
 		} catch (MessageTooLongException e) {
 			return response(e.getStatus(), e.getMaxMessageSize());
@@ -196,35 +212,44 @@ public class Session {
 		}
 	}
 
-	// replace by response(Status status, Object...) -> iterate over array, call
-	// Array.toString() if obj is array)...
-	@SuppressWarnings("unused")
-	private String response(Status status, Object retVal1, Message[] retVal2) {
-		return String.format("%s %s %s", status, retVal1, Arrays.toString(retVal2));
+	private String response(Status status, Object obj, TransmittableObject object, TransmittableObject[] objectList) {
+
+		String s = status.toString();
+
+		if (obj != null)
+			s += " " + obj.toString();
+
+		if (object != null)
+			s += " " + object.transmittableString();
+
+		if (objectList != null)
+			s += " " + TransmittableObject.toString(objectList);
+
+		return s;
+	}
+
+	private String response(Status status, Object retVal1, TransmittableObject[] retVal2) {
+		return response(status, retVal1, null, retVal2);
+	}
+
+	private String response(TransmittableObject retVal) {
+		return response(Status.OK, null, retVal, null);
+	}
+
+	private String response(Status status, Object retVal) {
+		return response(status, retVal, null, null);
 	}
 
 	private String response(Status status) {
-		return String.format("%s", status);
+		return response(status, null, null, null);
+	}
+
+	private String response(TransmittableObject[] retVal) {
+		return response(Status.OK, null, null, retVal);
 	}
 
 	private String response() {
 		return response(Status.OK);
-	}
-
-	private String response(Status status, Object retVal) {
-		return String.format("%s %s", status, retVal);
-	}
-
-	private String response(Status status, Object[] retVal) {
-		return String.format("%s %s", status, Arrays.toString(retVal));
-	}
-
-	private String response(Object retVal) {
-		return response(Status.OK, retVal);
-	}
-
-	private String response(Object[] retVal) {
-		return response(Status.OK, retVal);
 	}
 
 	public void disconnect() {
