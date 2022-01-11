@@ -12,6 +12,9 @@ plugins {
 
     // Apply plantuml plugin for plantuml diagram generation from sourcecode
     id "com.github.roroche.plantuml" version "1.0.2"
+
+    // Apply plantuml plugin for svg generation from plantuml diagram
+    id "io.github.redgreencoding.plantuml" version "0.1.0"
 }
 
 repositories {
@@ -21,7 +24,7 @@ repositories {
 
 dependencies {
     // Use JUnit Jupiter for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter5.7.2'
 
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:30.1.1-jre'
@@ -40,9 +43,38 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// svg generation config
+plantuml {
+
+    options {
+        // where should the .svg be generated to (defaults to build/plantuml)
+        outputDir = project.file("../diagrams/")
+
+        // output format (lowercase, defaults to svg)
+        format = "svg"
+    }
+
+    diagrams {
+
+        uml {
+            // .puml sourcefile, this can be also omitted and defaults to _<name>.puml_.
+            sourceFile = project.file("../diagrams/uml.plantuml")
+        }
+
+    }
+
+}
+
+// hide tasks for svg creation
+plantumlAll.group = null
+plantumlUml.group = null
+
 // plantuml generation config
 classDiagram {
     packageName = "server"
-    outputFile = project.file('diagrams/class_diagram.plantuml')
+    outputFile = project.file('../diagrams/uml.plantuml')
     ignoredClasses = []
 }
+
+// generate svg after generation
+buildClassDiagram.finalizedBy plantumlUml
