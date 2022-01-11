@@ -11,7 +11,7 @@ plugins {
     id 'application'
 
     // Apply plantuml plugin for plantuml diagram generation from sourcecode
-    id "com.exploids.plantumlfromsource" version "0.1.2"
+    id "com.github.roroche.plantuml" version "1.0.2"
 }
 
 repositories {
@@ -42,14 +42,7 @@ tasks.named('test') {
 
 // plantuml generation config
 classDiagram {
-    sourceSet = sourceSets.main
-    outputFile = project.file('build/diagrams/main.plantuml')
-    visibility = "package private"
-    associationFieldVisibility = "private"
-    associationMethodVisibility = null
-    colors = [
-        'some.package.name': '#d8d4fc',
-        'some.other.package.name': '#d4fcdc'
-    ]
-    before = "skinparam shadowing false"
+    packageName = "server"
+    outputFile = project.file('diagrams/class_diagram.plantuml')
+    ignoredClasses = []
 }
