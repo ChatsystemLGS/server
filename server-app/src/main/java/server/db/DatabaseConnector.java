@@ -18,6 +18,7 @@ import server.ProtocolException.PasswordInvalidException;
 import server.ProtocolException.TooManyMessagesException;
 import server.ProtocolException.UserNotFoundException;
 import server.db.Channel.ChannelType;
+import server.db.Message.DataType;
 import server.db.User.RelationshipType;
 import server.simplelogger.SimpleLogger;
 import server.simplelogger.SimpleLogger.LogLevel;
@@ -367,7 +368,7 @@ public class DatabaseConnector {
 
 	// yes, I know, I'm not checking if dm already exists...
 	// but I think I like it that way
-	public void createDm(User user, User userB) throws SQLException {
+	public void createDm(User user, User userB) throws SQLException, UserNotFoundException {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt1 = c.prepareStatement("INSERT INTO Channels (type) VALUES ('DM')");
@@ -397,10 +398,35 @@ public class DatabaseConnector {
 
 	}
 
+	// TODO change to RECEIVEMESSAGES (...) Timestamp tFrom int n
+	// -> LIMIT x ORDERED BY abc
+	// (Timestamp currently gets ignored)
 	public Message[] receiveMessages(User user, Channel channel, Timestamp tFrom, Timestamp tUntil)
-			throws TooManyMessagesException {
-		// TODO Auto-generated method stub
-		return null;
+			throws SQLException, TooManyMessagesException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt = c.prepareStatement(
+						"SELECT m.author author, m.timestamp timestamp, m.data data, m.dataType dataType FROM Messages m "
+								+ "INNER JOIN Channels c ON c.id = m.channel "
+								+ "INNER JOIN channelMembers cm ON cm.channel = c.id WHERE cm.user = ?")) {
+			stmt.setInt(1, user.getId());
+			ResultSet rs = stmt.executeQuery();
+
+			ArrayList<Message> messageList = new ArrayList<>();
+
+			while (rs.next()) {
+				int author = rs.getInt("author");
+				Timestamp timestamp = rs.getTimestamp("timestamp");
+				byte[] data = rs.getBytes("data");
+				DataType dataType = DataType.valueOf(rs.getString("dataType"));
+
+				messageList.add(new Message().withChannel(channel.getId()).withAuthor(author).withTimestamp(timestamp)
+						.withData(data).withDataType(dataType));
+			}
+
+			return messageList.toArray(new Message[messageList.size()]);
+		}
+
 	}
 
 }

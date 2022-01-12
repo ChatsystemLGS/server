@@ -114,8 +114,9 @@ INSERT INTO channelMembers (
     [channelId]
 )
 
--- receiveMessage
-SELECT m.channel, m.author, m.timestamp, m.data, m.dataType FROM Messages m
+-- receiveMessages
+SELECT m.author author, m.timestamp timestamp, m.data data, m.dataType dataType FROM Messages m
 INNER JOIN Channels c ON c.id = m.channel
 INNER JOIN channelMembers cm ON cm.channel = c.id
-WHERE cm.user = [userId];
+WHERE cm.user = [userId]
+LIMIT [limit];
