@@ -290,8 +290,6 @@ public class DatabaseConnector {
 			stmt.setInt(1, userA.getId());
 			stmt.setString(2, userB.getEmailAddress());
 
-			System.out.println(userB.getEmailAddress());
-
 			ResultSet rs = stmt.executeQuery();
 
 			if (!rs.next())
@@ -367,8 +365,35 @@ public class DatabaseConnector {
 		debugLog(user, "sent message", message, channel);
 	}
 
-	public void createDm(User user, User userB) {
-		// TODO Auto-generated method stub
+	// yes, I know, I'm not checking if dm already exists...
+	// but I think I like it that way
+	public void createDm(User user, User userB) throws SQLException {
+
+		try (Connection c = DriverManager.getConnection(connectionUrl);
+				PreparedStatement stmt1 = c.prepareStatement("INSERT INTO Channels (type) VALUES ('DM')");
+				PreparedStatement stmt2 = c.prepareStatement("SELECT LAST_INSERT_ID() insertedId");
+				PreparedStatement stmt3 = c
+						.prepareStatement("INSERT INTO channelMembers (user, channel) " + "VALUES (?, ?), (?, ?)")) {
+
+			stmt1.executeUpdate();
+
+			ResultSet rs = stmt2.executeQuery();
+
+			rs.first();
+			int insertedId = rs.getInt("insertedId");
+
+			stmt3.setInt(1, user.getId());
+			stmt3.setInt(2, insertedId);
+			stmt3.setInt(3, userB.getId());
+			stmt3.setInt(4, insertedId);
+
+			stmt3.executeUpdate();
+
+			debugLog(user, "created dm with", userB);
+
+		} catch (SQLIntegrityConstraintViolationException e) {
+			throw new UserNotFoundException();
+		}
 
 	}
 
