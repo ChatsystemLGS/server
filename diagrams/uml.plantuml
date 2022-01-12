@@ -1,0 +1,251 @@
+@startuml
+
+class "App" {
+  server : Server
+}
+
+class "Attr" {
+  value : T
+  set : boolean
+  set(T)
+  transmittableString() : String
+  unset() : T
+}
+
+abstract class "BasicLogger" {
+  logLevel : LogLevel
+  dateFormat : SimpleDateFormat
+  log(String, LogLevel)
+}
+
+class "Channel" {
+  id : Attr<Integer>
+  type : Attr<ChannelType>
+  name : Attr<String>
+  withId(int) : Channel
+  withName(String) : Channel
+  withType(ChannelType) : Channel
+}
+
+class "ChannelNotFoundException"
+
+enum "ChannelType" {
+  DM
+  PUBLIC_GROUP
+  PRIVATE_GROUP
+}
+
+class "ClientHandler" {
+  client : Socket
+  s : Scanner
+  pw : PrintWriter
+  session : Session
+  run()
+}
+
+class "Config" {
+  MAX_MESSAGE_LENGTH : int
+  PORT : int
+  DB_HOST : String
+  DB_PORT : int
+  DB_TABLE : String
+  DB_USER : String
+  DB_PASSWORD : String
+}
+
+class "ConsoleLogger"
+
+enum "DataType" {
+  TEXT
+  FILE_TXT
+  FILE_PNG
+  FILE_GIF
+  FILE_PDF
+}
+
+class "DatabaseConnector" {
+  connectionUrl : String
+  addFriendById(User, User)
+  addUser(User)
+  createDm(User, User)
+  getChannelMembers(User, Channel) : User[]
+  getChannels(User) : Channel[]
+  getFriends(User) : User[]
+  getUserByEmail(User, User) : User
+  getUserById(User, User) : User
+  joinGroup(User, Channel)
+  login(User) : User
+  receiveMessages(User, Channel, Timestamp, Timestamp) : Message[]
+  sendMessage(User, Channel, Message)
+}
+
+class "DmAlreadyExistsException" {
+  channelId : int
+}
+
+class "EmailAlreadyRegisteredException"
+
+class "EmailNotRegisteredException"
+
+class "FileLogger" {
+  logFile : File
+  bw : BufferedWriter
+  close()
+}
+
+class "InternalServerErrorException"
+
+class "InvalidParameterException" {
+  index : int
+}
+
+enum "LogLevel" {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+}
+
+interface "LogListener" {
+  log(String, LogLevel)
+}
+
+class "Message" {
+  id : Attr<Integer>
+  channel : Attr<Integer>
+  author : Attr<Integer>
+  timestamp : Attr<Timestamp>
+  data : Attr<byte[]>
+  dataType : Attr<DataType>
+  withAuthor(int) : Message
+  withChannel(int) : Message
+  withData(byte[]) : Message
+  withDataType(DataType) : Message
+  withId(int) : Message
+  withTimestamp(Timestamp) : Message
+}
+
+class "MessageTooLongException" {
+  MAX_MESSAGE_SIZE : int
+}
+
+class "NotMemberOfChannelException"
+
+class "PasswordInvalidException"
+
+class "PasswordRequirementNotMetException"
+
+abstract class "ProtocolException" {
+  status : Status
+}
+
+enum "RelationshipType" {
+  FRIEND
+  BLOCKED
+}
+
+class "Server" {
+  CFG : Config
+  DBC : DatabaseConnector
+}
+
+class "Session" {
+  server : Server
+  state : State
+  user : User
+  disconnect()
+  execute(String) : String
+  greet() : String
+}
+
+class "SimpleLogger"
+
+enum "Status" {
+  OK
+  NOT_ENOUGH_PARAMETERS
+  TOO_MANY_PARAMETERS
+  INVALID_PARAMETER
+  COMMAND_NOT_FOUND
+  INTERNAL_SERVER_ERROR
+  AUTHENTICATION_REQUIRED
+  EMAIL_ALREADY_REGISTERED
+  PASSWORD_REQ_NOT_MET
+  EMAIL_NOT_REGISTERED
+  PASSWORD_INVALID
+  NOT_MEMBER_OF_CHANNEL
+  MESSAGE_TOO_LONG
+  TOO_MANY_MESSAGES
+  CHANNEL_NOT_FOUND
+  USER_NOT_FOUND
+  DM_ALREADY_EXISTS
+}
+
+class "TooManyMessagesException" {
+  lastMessageTime : Date
+  messages : Message[]
+}
+
+abstract class "TransmittableObject" {
+  attributes : server.db.Attr<?>[]
+  transmittableString() : String
+}
+
+class "User" {
+  id : Attr<Integer>
+  emailAddress : Attr<String>
+  nickname : Attr<String>
+  passwordHash : Attr<String>
+  note : Attr<String>
+  type : Attr<RelationshipType>
+  isAdmin : Attr<Boolean>
+  withAdmin(boolean) : User
+  withEmailAddress(String) : User
+  withId(int) : User
+  withNickname(String) : User
+  withNote(String) : User
+  withPassword(String) : User
+  withType(RelationshipType) : User
+}
+
+class "UserNotFoundException"
+
+"App" --> "Server" : server
+"BasicLogger" <|-- "ConsoleLogger"
+"BasicLogger" <|-- "FileLogger"
+"BasicLogger" --> "LogLevel" : logLevel
+"Channel" --> "Attr" : id/type/name
+"Channel" --> "ChannelType" : type
+"ClientHandler" --> "Session" : session
+"DatabaseConnector" --> "Channel" : use
+"DatabaseConnector" --> "Message" : use
+"DatabaseConnector" --> "User" : use
+"LogListener" <|-- "BasicLogger"
+"LogListener" <|-- "ConsoleLogger"
+"LogListener" <|-- "FileLogger"
+"LogListener" --> "LogLevel" : use
+"Message" --> "Attr" : id/channel/author/timestamp/data/dataType
+"Message" --> "DataType" : dataType
+"ProtocolException" <|-- "ChannelNotFoundException"
+"ProtocolException" <|-- "DmAlreadyExistsException"
+"ProtocolException" <|-- "EmailAlreadyRegisteredException"
+"ProtocolException" <|-- "EmailNotRegisteredException"
+"ProtocolException" <|-- "InternalServerErrorException"
+"ProtocolException" <|-- "InvalidParameterException"
+"ProtocolException" <|-- "MessageTooLongException"
+"ProtocolException" <|-- "NotMemberOfChannelException"
+"ProtocolException" <|-- "PasswordInvalidException"
+"ProtocolException" <|-- "PasswordRequirementNotMetException"
+"ProtocolException" --> "Status" : status
+"ProtocolException" <|-- "TooManyMessagesException"
+"ProtocolException" <|-- "UserNotFoundException"
+"Server" --> "Config" : CFG
+"Server" --> "DatabaseConnector" : DBC
+"Session" --> "Server" : server
+"Session" --> "User" : user
+"TransmittableObject" <|-- "Channel"
+"TransmittableObject" <|-- "Message"
+"TransmittableObject" <|-- "User"
+"User" --> "Attr" : id/emailAddress/nickname/passwordHash/note/type/isAdmin
+"User" --> "RelationshipType" : type
+
+@enduml

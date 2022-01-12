@@ -1,5 +1,7 @@
 # Server for our Chatservice
 
+![UML-Diagram](./diagrams/uml.svg)
+
 ## Protokoll
 
 ### Designentscheidungen
