@@ -22,6 +22,7 @@ class "Channel" {
   id : Attr<Integer>
   type : Attr<ChannelType>
   name : Attr<String>
+  transmittableString() : String
   withId(int) : Channel
   withName(String) : Channel
   withType(ChannelType) : Channel
@@ -97,6 +98,7 @@ class "InternalServerErrorException"
 
 class "InvalidParameterException" {
   index : int
+  expectedType : ArgType
 }
 
 enum "LogLevel" {
@@ -110,6 +112,12 @@ interface "LogListener" {
   log(String, LogLevel)
 }
 
+enum "LogType" {
+  APPEND
+  OVERWRITE
+  DO_NOT_OVERWRITE
+}
+
 class "Message" {
   id : Attr<Integer>
   channel : Attr<Integer>
@@ -117,6 +125,7 @@ class "Message" {
   timestamp : Attr<Timestamp>
   data : Attr<byte[]>
   dataType : Attr<DataType>
+  transmittableString() : String
   withAuthor(int) : Message
   withChannel(int) : Message
   withData(byte[]) : Message
@@ -129,6 +138,10 @@ class "MessageTooLongException" {
   MAX_MESSAGE_SIZE : int
 }
 
+class "NotEnoughParametersException" {
+  min : int
+}
+
 class "NotMemberOfChannelException"
 
 class "PasswordInvalidException"
@@ -137,6 +150,8 @@ class "PasswordRequirementNotMetException"
 
 abstract class "ProtocolException" {
   status : Status
+  transmittableString : String
+  transmittableString() : String
 }
 
 enum "RelationshipType" {
@@ -185,9 +200,13 @@ class "TooManyMessagesException" {
   messages : Message[]
 }
 
-abstract class "TransmittableObject" {
-  attributes : server.db.Attr<?>[]
+class "TooManyParametersException" {
+  max : int
+}
+
+interface "TransmittableObject" {
   transmittableString() : String
+  transmittableString(server.db.Attr<?>[]) : String
 }
 
 class "User" {
@@ -198,6 +217,7 @@ class "User" {
   note : Attr<String>
   type : Attr<RelationshipType>
   isAdmin : Attr<Boolean>
+  transmittableString() : String
   withAdmin(boolean) : User
   withEmailAddress(String) : User
   withId(int) : User
@@ -232,19 +252,36 @@ class "UserNotFoundException"
 "ProtocolException" <|-- "InternalServerErrorException"
 "ProtocolException" <|-- "InvalidParameterException"
 "ProtocolException" <|-- "MessageTooLongException"
+"ProtocolException" <|-- "NotEnoughParametersException"
 "ProtocolException" <|-- "NotMemberOfChannelException"
 "ProtocolException" <|-- "PasswordInvalidException"
 "ProtocolException" <|-- "PasswordRequirementNotMetException"
 "ProtocolException" --> "Status" : status
 "ProtocolException" <|-- "TooManyMessagesException"
+"ProtocolException" <|-- "TooManyParametersException"
 "ProtocolException" <|-- "UserNotFoundException"
 "Server" --> "Config" : CFG
 "Server" --> "DatabaseConnector" : DBC
 "Session" --> "Server" : server
 "Session" --> "User" : user
 "TransmittableObject" <|-- "Channel"
+"TransmittableObject" <|-- "ChannelNotFoundException"
+"TransmittableObject" <|-- "DmAlreadyExistsException"
+"TransmittableObject" <|-- "EmailAlreadyRegisteredException"
+"TransmittableObject" <|-- "EmailNotRegisteredException"
+"TransmittableObject" <|-- "InternalServerErrorException"
+"TransmittableObject" <|-- "InvalidParameterException"
 "TransmittableObject" <|-- "Message"
+"TransmittableObject" <|-- "MessageTooLongException"
+"TransmittableObject" <|-- "NotEnoughParametersException"
+"TransmittableObject" <|-- "NotMemberOfChannelException"
+"TransmittableObject" <|-- "PasswordInvalidException"
+"TransmittableObject" <|-- "PasswordRequirementNotMetException"
+"TransmittableObject" <|-- "ProtocolException"
+"TransmittableObject" <|-- "TooManyMessagesException"
+"TransmittableObject" <|-- "TooManyParametersException"
 "TransmittableObject" <|-- "User"
+"TransmittableObject" <|-- "UserNotFoundException"
 "User" --> "Attr" : id/emailAddress/nickname/passwordHash/note/type/isAdmin
 "User" --> "RelationshipType" : type
 

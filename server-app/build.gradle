@@ -11,10 +11,10 @@ plugins {
     id 'application'
 
     // Apply plantuml plugin for plantuml diagram generation from sourcecode
-    id "com.github.roroche.plantuml" version "1.0.2"
+    id 'com.github.roroche.plantuml' version '1.0.2'
 
     // Apply plantuml plugin for svg generation from plantuml diagram
-    id "io.github.redgreencoding.plantuml" version "0.1.0"
+    id 'io.github.redgreencoding.plantuml' version '0.1.0'
 }
 
 repositories {
@@ -26,9 +26,6 @@ dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter5.7.2'
 
-    // This dependency is used by the application.
-    implementation 'com.google.guava:guava:30.1.1-jre'
-    
     // MariaDB JDBC driver
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.1.2'
 }
@@ -43,26 +40,34 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// svg generation config
-plantuml {
+/*
 
+ Config for UML-diagram generation from sourcecode
+
+ 1. create .puml file from source
+ 2. generate .svg from .puml
+
+*/
+
+String diagramPath = '../diagrams/'
+String diagramFilename = 'uml.puml'
+String rootPackage = 'server'
+
+plantuml {
     options {
         // where should the .svg be generated to (defaults to build/plantuml)
-        outputDir = project.file("../diagrams/")
+        outputDir = project.file(diagramPath)
 
         // output format (lowercase, defaults to svg)
-        format = "svg"
+        format = 'svg'
     }
 
     diagrams {
-
         uml {
-            // .puml sourcefile, this can be also omitted and defaults to _<name>.puml_.
-            sourceFile = project.file("../diagrams/uml.plantuml")
+            // specify .puml sourcefile
+            sourceFile = project.file(diagramPath + diagramFilename)
         }
-
     }
-
 }
 
 // hide tasks for svg creation
@@ -71,8 +76,8 @@ plantumlUml.group = null
 
 // plantuml generation config
 classDiagram {
-    packageName = "server"
-    outputFile = project.file('../diagrams/uml.plantuml')
+    packageName = rootPackage
+    outputFile = project.file('diagramPath + diagramFilename')
     ignoredClasses = []
 }
 
