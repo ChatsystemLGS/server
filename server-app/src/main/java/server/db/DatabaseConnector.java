@@ -9,6 +9,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import server.TransmittableObject;
 import server.ProtocolException.ChannelNotFoundException;
 import server.ProtocolException.EmailAlreadyRegisteredException;
 import server.ProtocolException.EmailNotRegisteredException;

@@ -4,7 +4,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
-public class User extends TransmittableObject {
+import server.TransmittableObject;
+
+public class User implements TransmittableObject {
 
 	private Attr<Integer> id = new Attr<>();
 	private Attr<String> emailAddress = new Attr<>();
@@ -18,10 +20,6 @@ public class User extends TransmittableObject {
 	// check password requirements
 	// check email valid format
 	// change hashing algorithm to bcrypt and add salt
-
-	public User() {
-		registerAttributes(id, emailAddress, nickname, passwordHash, note, type, isAdmin);
-	}
 
 	private String hashPassword(String password) {
 		MessageDigest md = null;
@@ -103,6 +101,11 @@ public class User extends TransmittableObject {
 
 	public enum RelationshipType {
 		FRIEND, BLOCKED
+	}
+	
+	@Override
+	public String transmittableString() {
+		return transmittableString(id, emailAddress, nickname, passwordHash, note, type, isAdmin);
 	}
 
 }

@@ -12,7 +12,6 @@ import server.ProtocolException.TooManyMessagesException;
 import server.db.Channel;
 import server.db.Message;
 import server.db.Message.DataType;
-import server.db.TransmittableObject;
 import server.db.User;
 
 public class Session {

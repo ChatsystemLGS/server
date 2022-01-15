@@ -1,14 +1,12 @@
 package server.db;
 
-public class Channel extends TransmittableObject {
+import server.TransmittableObject;
+
+public class Channel implements TransmittableObject {
 
 	private Attr<Integer> id = new Attr<>();
 	private Attr<ChannelType> type = new Attr<>();
 	private Attr<String> name = new Attr<>();
-	
-	public Channel() {
-		registerAttributes(id, type, name);
-	}
 	
 	public Channel withId(int id) {
 		this.id.set(id);
@@ -41,4 +39,9 @@ public class Channel extends TransmittableObject {
 		DM, PUBLIC_GROUP, PRIVATE_GROUP
 	}
 
+	@Override
+	public String transmittableString() {
+		return transmittableString(id, type, name);
+	}
+	
 }

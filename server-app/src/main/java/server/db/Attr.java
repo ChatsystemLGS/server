@@ -1,5 +1,7 @@
 package server.db;
 
+import server.TransmittableObject;
+
 public class Attr<T> {
 
 	private T value = null;

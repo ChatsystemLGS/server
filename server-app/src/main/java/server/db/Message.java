@@ -2,7 +2,9 @@ package server.db;
 
 import java.sql.Timestamp;
 
-public class Message extends TransmittableObject {
+import server.TransmittableObject;
+
+public class Message implements TransmittableObject {
 
 	private Attr<Integer> id = new Attr<>();
 	private Attr<Integer> channel = new Attr<>();
@@ -10,10 +12,6 @@ public class Message extends TransmittableObject {
 	private Attr<Timestamp> timestamp = new Attr<>();
 	private Attr<byte[]> data = new Attr<>();
 	private Attr<DataType> dataType = new Attr<>();
-
-	public Message() {
-		registerAttributes(id, channel, author, timestamp, data, dataType);
-	}
 
 	public Message withId(int id) {
 		this.id.set(id);
@@ -70,9 +68,12 @@ public class Message extends TransmittableObject {
 	}
 
 	public enum DataType {
-
 		TEXT, FILE_TXT, FILE_PNG, FILE_GIF, FILE_PDF;
-
+	}
+	
+	@Override
+	public String transmittableString() {
+		return transmittableString(id, channel, author, timestamp, data, dataType);
 	}
 
 }
