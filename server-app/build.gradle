@@ -77,7 +77,7 @@ plantumlUml.group = null
 // plantuml generation config
 classDiagram {
     packageName = rootPackage
-    outputFile = project.file('diagramPath + diagramFilename')
+    outputFile = project.file(diagramPath + diagramFilename)
     ignoredClasses = []
 }
 
