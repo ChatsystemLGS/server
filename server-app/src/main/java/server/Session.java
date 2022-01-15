@@ -167,7 +167,7 @@ public class Session {
 		try {
 			return Enum.valueOf(enumType, args[i]);
 		} catch (IllegalArgumentException e) {
-			throw new InvalidParameterException(i);
+			throw new InvalidParameterException(i, ArgType.STRING_ENUM);
 		}
 	}
 
@@ -175,7 +175,7 @@ public class Session {
 		try {
 			return Integer.parseInt(args[i]);
 		} catch (NumberFormatException e) {
-			throw new InvalidParameterException(i);
+			throw new InvalidParameterException(i, ArgType.INTEGER);
 		}
 	}
 
@@ -183,7 +183,7 @@ public class Session {
 		try {
 			return new Timestamp(getInt(args, i));
 		} catch (IllegalArgumentException e) {
-			throw new InvalidParameterException(i);
+			throw new InvalidParameterException(i, ArgType.INTEGER_TIMESTAMP);
 		}
 	}
 
@@ -191,7 +191,7 @@ public class Session {
 		try {
 			return new String(TransmittableObject.fromBase64String(args[i]));
 		} catch (IllegalArgumentException e) {
-			throw new InvalidParameterException(i);
+			throw new InvalidParameterException(i, ArgType.STRING);
 		}
 	}
 
@@ -199,7 +199,7 @@ public class Session {
 		try {
 			return TransmittableObject.fromBase64String(args[i]);
 		} catch (IllegalArgumentException e) {
-			throw new InvalidParameterException(i);
+			throw new InvalidParameterException(i, ArgType.STRING_DATA);
 		}
 	}
 
@@ -306,6 +306,10 @@ public class Session {
 			return numArgs;
 		}
 
+	}
+	
+	enum ArgType {
+		STRING, INTEGER, STRING_DATA, STRING_ENUM, INTEGER_TIMESTAMP
 	}
 
 }

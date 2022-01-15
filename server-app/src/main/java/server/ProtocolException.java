@@ -2,6 +2,7 @@ package server;
 
 import java.sql.Date;
 
+import server.Session.ArgType;
 import server.db.Message;
 
 public abstract class ProtocolException extends Exception implements TransmittableObject {
@@ -40,14 +41,20 @@ public abstract class ProtocolException extends Exception implements Transmittab
 		 */
 		private static final long serialVersionUID = -4208867606970220161L;
 		private final int index;
+		private final ArgType expectedType;
 
-		public InvalidParameterException(int index) {
-			super(Status.INVALID_PARAMETER);
+		public InvalidParameterException(int index, ArgType expectedType) {
+			super(Status.INVALID_PARAMETER, index, expectedType);
 			this.index = index;
+			this.expectedType = expectedType;
 		}
 
 		public int getIndex() {
 			return index;
+		}
+
+		public ArgType getExpectedType() {
+			return expectedType;
 		}
 
 	}
@@ -146,8 +153,12 @@ public abstract class ProtocolException extends Exception implements Transmittab
 		private final Message[] messages;
 
 		public TooManyMessagesException(Date lastMessageTime, Message[] messages) {
-			super(Status.TOO_MANY_MESSAGES, lastMessageTime, messages); // TODO this wont work... need instanceof check in ProtocolException() to handle TransmittableObject[]
-			this.lastMessageTime = lastMessageTime;						// regardless of that protocol definition should get updated -> messages get returned order by timestamp; lastMessageTime will be obsolete
+			super(Status.TOO_MANY_MESSAGES, lastMessageTime, messages); // TODO this wont work... need instanceof check
+																		// in ProtocolException() to handle
+																		// TransmittableObject[]
+			this.lastMessageTime = lastMessageTime; // regardless of that protocol definition should get updated ->
+													// messages get returned order by timestamp; lastMessageTime will be
+													// obsolete
 			this.messages = messages;
 		}
 
@@ -218,7 +229,7 @@ public abstract class ProtocolException extends Exception implements Transmittab
 		}
 
 	}
-	
+
 	public enum Status {
 
 		OK, NOT_ENOUGH_PARAMETERS, TOO_MANY_PARAMETERS, INVALID_PARAMETER, COMMAND_NOT_FOUND, INTERNAL_SERVER_ERROR,
