@@ -6,7 +6,9 @@ import java.time.Instant;
 
 import server.ProtocolException.InternalServerErrorException;
 import server.ProtocolException.InvalidParameterException;
+import server.ProtocolException.NotEnoughParametersException;
 import server.ProtocolException.Status;
+import server.ProtocolException.TooManyParametersException;
 import server.db.Channel;
 import server.db.Message;
 import server.db.Message.DataType;
@@ -47,14 +49,13 @@ public class Session {
 		if (!(cmd.getRequiredState() == state || state.hasParent(cmd.getRequiredState())))
 			return response(Status.AUTHENTICATION_REQUIRED);
 
-		// check if amount of parameters matches command
-		if (args.length - 1 != cmd.getNumArgs())
-			if (args.length - 1 < cmd.getNumArgs())
-				return response(Status.NOT_ENOUGH_PARAMETERS, cmd.getNumArgs());
-			else
-				return response(Status.TOO_MANY_PARAMETERS, cmd.getNumArgs());
-
 		try {
+
+			// check if amount of parameters matches command
+			if (args.length - 1 < cmd.getMinNumArgs())
+				throw new NotEnoughParametersException(cmd.getMinNumArgs());
+			if (args.length - 1 > cmd.getMaxNumArgs())
+				throw new TooManyParametersException(cmd.getMaxNumArgs());
 
 			try {
 
@@ -94,7 +95,8 @@ public class Session {
 					try {
 						user = server.DBC.getUserById(this.user, new User().withId(getInt(args, 1)));
 					} catch (InvalidParameterException e) {
-						user = server.DBC.getUserByEmail(this.user, new User().withEmailAddress(args[1]));
+						user = server.DBC.getUserByEmail(this.user,
+								new User().withEmailAddress(getBase64String(args, 1)));
 					}
 
 					yield response(user);
@@ -280,36 +282,6 @@ public class Session {
 				return parentState.hasParent(state);
 		}
 
-	}
-
-	enum Command {
-
-		REGISTER(State.CONNECTED, 3), LOGIN(State.CONNECTED, 2), GETPUBLICGROUPS(State.AUTHENTICATED, 0),
-		JOINGROUP(State.AUTHENTICATED, 1), GETCHANNELS(State.AUTHENTICATED, 0),
-		GETCHANNELMEMBERS(State.AUTHENTICATED, 1), GETUSER(State.AUTHENTICATED, 1), ADDFRIEND(State.AUTHENTICATED, 1),
-		GETFRIENDS(State.AUTHENTICATED, 0), SENDMESSAGE(State.AUTHENTICATED, 3), CREATEDM(State.AUTHENTICATED, 1),
-		RECEIVEMESSAGES(State.AUTHENTICATED, 3), QUIT(State.CONNECTED, 0);
-
-		private final State requiredState;
-		private final int numArgs;
-
-		Command(State requiredState, int numArgs) {
-			this.requiredState = requiredState;
-			this.numArgs = numArgs;
-		}
-
-		public State getRequiredState() {
-			return requiredState;
-		}
-
-		public int getNumArgs() {
-			return numArgs;
-		}
-
-	}
-	
-	enum ArgType {
-		STRING, INTEGER, STRING_DATA, STRING_ENUM, INTEGER_TIMESTAMP
 	}
 
 }

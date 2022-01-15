@@ -2,7 +2,6 @@ package server;
 
 import java.sql.Date;
 
-import server.Session.ArgType;
 import server.db.Message;
 
 public abstract class ProtocolException extends Exception implements TransmittableObject {
@@ -226,6 +225,44 @@ public abstract class ProtocolException extends Exception implements Transmittab
 
 		public InternalServerErrorException() {
 			super(Status.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	public static class TooManyParametersException extends ProtocolException {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2090294066074219275L;
+		private final int max;
+
+		public TooManyParametersException(int max) {
+			super(Status.TOO_MANY_PARAMETERS, max);
+			this.max = max;
+		}
+
+		public int getMax() {
+			return max;
+		}
+
+	}
+
+	public static class NotEnoughParametersException extends ProtocolException {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7470785087903607000L;
+		private final int min;
+
+		public NotEnoughParametersException(int min) {
+			super(Status.NOT_ENOUGH_PARAMETERS, min);
+			this.min = min;
+		}
+
+		public int getMin() {
+			return min;
 		}
 
 	}
