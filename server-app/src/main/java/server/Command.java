@@ -4,19 +4,61 @@ import server.Session.State;
 
 enum Command {
 
-	REGISTER(State.CONNECTED, new ArgType[] { ArgType.STRING, ArgType.STRING, ArgType.STRING }),
-	LOGIN(State.CONNECTED, new ArgType[] { ArgType.STRING, ArgType.STRING }), GETPUBLICGROUPS(State.AUTHENTICATED),
-	JOINGROUP(State.AUTHENTICATED, new ArgType[] { ArgType.INTEGER }), GETCHANNELS(State.AUTHENTICATED),
-	GETCHANNELMEMBERS(State.AUTHENTICATED, new ArgType[] { ArgType.INTEGER }),
-	GETUSER(State.AUTHENTICATED, new ArgType[] { ArgType.INTEGER }, new ArgType[] { ArgType.STRING }),
-	ADDFRIEND(State.AUTHENTICATED, new ArgType[] { ArgType.INTEGER }), GETFRIENDS(State.AUTHENTICATED),
-	SENDMESSAGE(State.AUTHENTICATED,
-			new ArgType[] { ArgType.INTEGER, ArgType.STRING_DATA, ArgType.STRING_ENUM, ArgType.INTEGER_TIMESTAMP }),
-	CREATEDM(State.AUTHENTICATED, new ArgType[] { ArgType.INTEGER }),
-	RECEIVEMESSAGES(State.AUTHENTICATED,
-			new ArgType[] { ArgType.INTEGER, ArgType.INTEGER_TIMESTAMP, ArgType.INTEGER_TIMESTAMP }),
+	REGISTER(State.CONNECTED, new ArgType[] { 
+		ArgType.STRING, 
+		ArgType.STRING, 
+		ArgType.STRING 
+	}),
+
+	LOGIN(State.CONNECTED, new ArgType[] { 
+		ArgType.STRING, 
+		ArgType.STRING 
+	}), 
+
+	GETPUBLICGROUPS(State.AUTHENTICATED),
+
+	JOINGROUP(State.AUTHENTICATED, new ArgType[] { 
+		ArgType.INTEGER 
+	}), 
+
+	GETCHANNELS(State.AUTHENTICATED),
+
+	GETCHANNELMEMBERS(State.AUTHENTICATED, new ArgType[] {
+		ArgType.INTEGER 
+	}),
+
+	GETUSER(State.AUTHENTICATED, new ArgType[] { 
+		ArgType.INTEGER 
+	}, new ArgType[] { 
+		ArgType.STRING 
+	}),
+
+	ADDFRIEND(State.AUTHENTICATED, new ArgType[] { 
+		ArgType.INTEGER 
+	}), 
+
+	GETFRIENDS(State.AUTHENTICATED),
+
+	SENDMESSAGE(State.AUTHENTICATED, new ArgType[] { 
+		ArgType.INTEGER, 
+		ArgType.STRING_DATA,
+		ArgType.STRING_ENUM, 
+		ArgType.INTEGER_TIMESTAMP 
+	}),
+
+	CREATEDM(State.AUTHENTICATED, new ArgType[] { 
+		ArgType.INTEGER 
+	}),
+
+	RECEIVEMESSAGES(State.AUTHENTICATED, new ArgType[] { 
+		ArgType.INTEGER, 
+		ArgType.INTEGER_TIMESTAMP, 
+		ArgType.INTEGER_TIMESTAMP 
+	}),
+
 	QUIT(State.CONNECTED);
 
+	
 	private final State requiredState;
 	private final int minNumArgs;
 	private final int maxNumArgs;
