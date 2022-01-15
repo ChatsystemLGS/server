@@ -6,9 +6,7 @@ import java.time.Instant;
 
 import server.ProtocolException.InternalServerErrorException;
 import server.ProtocolException.InvalidParameterException;
-import server.ProtocolException.MessageTooLongException;
 import server.ProtocolException.Status;
-import server.ProtocolException.TooManyMessagesException;
 import server.db.Channel;
 import server.db.Message;
 import server.db.Message.DataType;
@@ -156,15 +154,9 @@ public class Session {
 
 		} catch (InternalServerErrorException e) {
 			disconnect();
-			return response(e.getStatus());
-		} catch (MessageTooLongException e) {
-			return response(e.getStatus(), e.getMaxMessageSize());
-		} catch (TooManyMessagesException e) {
-			return response(e.getStatus(), e.getLastMessageTime(), e.getMessages());
-		} catch (InvalidParameterException e) {
-			return response(e.getStatus(), e.getIndex());
+			return response(e);
 		} catch (ProtocolException e) {
-			return response(e.getStatus());
+			return response(e);
 		}
 
 	}
@@ -225,10 +217,6 @@ public class Session {
 			s += " " + TransmittableObject.toString(objectList);
 
 		return s;
-	}
-
-	private String response(Status status, Object retVal1, TransmittableObject[] retVal2) {
-		return response(status, retVal1, null, retVal2);
 	}
 
 	private String response(TransmittableObject retVal) {

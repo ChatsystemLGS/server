@@ -4,7 +4,7 @@ import java.sql.Date;
 
 import server.db.Message;
 
-public abstract class ProtocolException extends Exception {
+public abstract class ProtocolException extends Exception implements TransmittableObject {
 
 	/**
 	 * 
@@ -12,12 +12,25 @@ public abstract class ProtocolException extends Exception {
 	private static final long serialVersionUID = -2162828148268985546L;
 	private final Status status;
 
-	ProtocolException(Status status) {
+	private final String transmittableString;
+
+	ProtocolException(Status status, Object... objs) {
 		this.status = status;
+
+		String s = status.toString();
+		for (int i = 0; i < objs.length; i++)
+			s += " " + objs[i].toString();
+
+		this.transmittableString = s;
 	}
 
 	public Status getStatus() {
 		return status;
+	}
+
+	@Override
+	public String transmittableString() {
+		return transmittableString;
 	}
 
 	public static class InvalidParameterException extends ProtocolException {
@@ -113,7 +126,7 @@ public abstract class ProtocolException extends Exception {
 		private final int MAX_MESSAGE_SIZE;
 
 		public MessageTooLongException(int MAX_MESSAGE_SIZE) {
-			super(Status.MESSAGE_TOO_LONG);
+			super(Status.MESSAGE_TOO_LONG, MAX_MESSAGE_SIZE);
 			this.MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
 		}
 
@@ -133,8 +146,8 @@ public abstract class ProtocolException extends Exception {
 		private final Message[] messages;
 
 		public TooManyMessagesException(Date lastMessageTime, Message[] messages) {
-			super(Status.TOO_MANY_MESSAGES);
-			this.lastMessageTime = lastMessageTime;
+			super(Status.TOO_MANY_MESSAGES, lastMessageTime, messages); // TODO this wont work... need instanceof check in ProtocolException() to handle TransmittableObject[]
+			this.lastMessageTime = lastMessageTime;						// regardless of that protocol definition should get updated -> messages get returned order by timestamp; lastMessageTime will be obsolete
 			this.messages = messages;
 		}
 
@@ -183,7 +196,7 @@ public abstract class ProtocolException extends Exception {
 		private final int channelId;
 
 		public DmAlreadyExistsException(int channelId) {
-			super(Status.DM_ALREADY_EXISTS);
+			super(Status.DM_ALREADY_EXISTS, channelId);
 			this.channelId = channelId;
 		}
 
