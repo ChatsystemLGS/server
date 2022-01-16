@@ -22,6 +22,19 @@ public interface TransmittableObject {
 
 		return s;
 	}
+	
+	default String readableString(Attr<?>... attributes) {
+
+		String s = "";
+
+		for (int i = 0; i < attributes.length - 1; i++) {
+
+			s += attributes[i] + " ";
+		}
+		s += attributes[attributes.length - 1];
+
+		return s;
+	}
 
 	public static String toBase64String(byte[] data) {
 		return Base64.getEncoder().encodeToString(data);
@@ -49,5 +62,5 @@ public interface TransmittableObject {
 			b.append(", ");
 		}
 	}
-
+	
 }

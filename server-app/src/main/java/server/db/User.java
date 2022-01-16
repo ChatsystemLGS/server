@@ -102,10 +102,15 @@ public class User implements TransmittableObject {
 	public enum RelationshipType {
 		FRIEND, BLOCKED
 	}
-	
+
 	@Override
 	public String transmittableString() {
 		return transmittableString(id, emailAddress, nickname, passwordHash, note, type, isAdmin);
+	}
+
+	@Override
+	public String toString() {
+		return readableString(id, emailAddress, nickname, passwordHash, note, type, isAdmin);
 	}
 
 }

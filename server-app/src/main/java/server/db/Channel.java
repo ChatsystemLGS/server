@@ -44,4 +44,9 @@ public class Channel implements TransmittableObject {
 		return transmittableString(id, type, name);
 	}
 	
+	@Override
+	public String toString() {
+		return readableString(id, type, name);
+	}
+	
 }

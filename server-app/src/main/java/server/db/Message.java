@@ -75,5 +75,10 @@ public class Message implements TransmittableObject {
 	public String transmittableString() {
 		return transmittableString(id, channel, author, timestamp, data, dataType);
 	}
+	
+	@Override
+	public String toString() {
+		return readableString(id, channel, author, timestamp, data, dataType);
+	}
 
 }
