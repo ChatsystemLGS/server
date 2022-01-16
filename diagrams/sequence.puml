@@ -1,0 +1,155 @@
+@startuml sequence
+
+skinparam {
+    SequenceMessageAlignment center
+    ParticipantPadding 20
+    style strictuml
+}
+
+actor " : Actor" as A
+
+participant ": ClientHandler" as CH
+participant "s : Scanner" as S
+participant "pw : PrintWriter" as PW
+participant "session : Session" as SES
+participant "DBC : DatabaseConnector" as DBC
+participant "<<metaclass>>\nTransmittableObject" as TRANSM
+participant "tmpUser : User" as TMPUSER
+participant "user : User" as USER
+participant "<<metaclass>>\nDriverManager" as DRVRMNGR
+participant "c : Connection" as CONN
+participant "stmt : PreparedStatement" as STMT
+participant "rs : ResultSet" as RS
+
+A -> CH ++ : run()
+
+    CH -> SES ++ : greet()
+        SES -> SES ++ : response(Status.OK, "0.0.0")
+            ' omitted
+        return "OK 0.0.0"
+    return "OK 0.0.0"
+
+    CH -> CH ++ : writeLine("OK 0.0.0")
+        CH -> PW ++ : printLine("OK 0.0.0")
+        return
+    return
+
+    CH -> CH ++ : readLine()
+        CH -> S ++ : nextLine()
+        return "LOGIN bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ== bVdlMWhfMTIzNA=="
+    return "LOGIN bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ== bVdlMWhfMTIzNA=="
+
+    CH -> SES ++ : execute("LOGIN bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ== bVdlMWhfMTIzNA==")
+
+        SES -> SES ++ : getEnum({"LOGIN", "bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ==", "bVdlMWhfMTIzNA=="}, 0, Command.class)
+            ' omitted
+        return Command.LOGIN
+
+        SES -> TMPUSER ** : <<create>>\nnew User()
+
+        SES -> SES ++ : getBase64String({"LOGIN", "bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ==", "bVdlMWhfMTIzNA=="}, 1)
+            SES -> TRANSM ++ : fromBase64Strig("bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ==")
+                ' omitted
+            return "mirko.leon.weih@lgs-hu.eu"
+        return "mirko.leon.weih@lgs-hu.eu"
+
+        SES -> TMPUSER ++ : withEmailAddress("mirko.leon.weih@lgs-hu.eu")
+        return tmpUser
+
+        SES -> SES ++ : getBase64String({"LOGIN", "bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ==", "bVdlMWhfMTIzNA=="}, 2)
+            SES -> TRANSM ++ : fromBase64Strig("bVdlMWhfMTIzNA==")
+                ' omitted
+            return "mWe1h_1234"
+        return "mWe1h_1234"
+
+        SES -> TMPUSER ++ : withPassword("mWe1h_1234")
+        return tmpUser
+
+        SES -> DBC ++ : login(tmpUser)
+
+            DBC -> DRVRMNGR ++ : getConnection("jdbc:mysql://10.5.148.5:3306/Chat?user=chat&password=****")
+                ' omitted
+                DRVRMNGR -> CONN ** : <<create>>\nnew Connection()
+            return c
+
+            DBC -> CONN ++ : preparedStatement("SELECT u.id id, u.emailAddress emailAddress, u.nickname nickname, ur.note note FROM Users u LEFT JOIN userRelationships ur ON ur.userA=ur.userB WHERE u.emailAddress = ?")
+                ' omitted
+                CONN -> STMT ** : <<create>>\nnew Statement()
+            return stmt
+
+            DBC -> TMPUSER ++ : getEmailAddress()
+            return "mirko.leon.weih@lgs-hu.eu"
+
+            DBC -> STMT ++ : setString(1, "mirko.leon.weih@lgs-hu.eu")
+            return
+
+            DBC -> STMT ++ : executeQuery()
+                ' omitted
+                STMT -> RS ** : <<create>>\nnew ResultSet()
+            return rs
+
+            DBC -> RS ++ : first()
+            return
+
+            DBC -> RS ++ : getInt("id")
+            return 4
+
+            DBC -> RS ++ : getString("emailAddress")
+            return "mirko.leon.weih@lgs-hu.eu"
+
+            DBC -> RS ++ : getString("nickname")
+            return "Mirco"
+
+            DBC -> RS ++ : getString("note")
+            return null
+
+            DBC -> USER ** : <<create>>\nnew User()
+
+            DBC -> USER ++ : withId(4)
+            return user
+
+            DBC -> USER ++ : withEmailAddress("mirko.leon.weih@lgs-hu.eu")
+            return user
+
+            DBC -> USER ++ : withNickname("Mirco")
+            return user
+
+            DBC -> USER ++ : withNote(null)
+            return user
+
+        return user
+
+        SES -> SES ++ : response()
+            ' omitted
+        return "OK"
+
+    return "OK"
+
+    CH -> CH ++ : writeLine("OK 0.0.0")
+        CH -> PW ++ : printLine("OK 0.0.0")
+        return
+    return
+
+    ... <b>more communication ...
+
+    CH -> CH ++ : readLine()
+        CH -> S ++ : nextLine()
+        return "QUIT"
+    return "QUIT"
+
+    CH -> SES ++ : execute("QUIT")
+
+        SES -> SES ++ : getEnum({"QUIT"}, 0, Command.class)
+            ' omitted
+        return Command.LOGIN
+
+        SES -> SES ++ : response()
+            ' omitted
+        return "OK"
+
+    return "OK"
+return
+
+@enduml
+
+' Static class -> https://www.informit.com/articles/article.aspx?p=360441&seqNum=5
