@@ -50,7 +50,10 @@ public class DatabaseConnector {
 			stmt.setString(3, user.getPasswordHash());
 			if (stmt.executeUpdate() == 0)
 				throw new EmailAlreadyRegisteredException();
+		} catch (SQLIntegrityConstraintViolationException e) {
+			throw new EmailAlreadyRegisteredException();
 		}
+		
 		debugLog(user, "added user", user);
 	}
 
