@@ -220,6 +220,10 @@ public class Session {
 
 		return s;
 	}
+	
+	private String response(ProtocolException e) {
+		return e.transmittableString();
+	}
 
 	private String response(TransmittableObject retVal) {
 		return response(Status.OK, null, retVal, null);
