@@ -12,9 +12,9 @@ participant ": ClientHandler" as CH
 participant "s : Scanner" as S
 participant "pw : PrintWriter" as PW
 participant "session : Session" as SES
-participant "DBC : DatabaseConnector" as DBC
 participant "<<metaclass>>\nTransmittableObject" as TRANSM
-participant "tmpUser : User" as TMPUSER
+participant "u : User" as U
+participant "DBC : DatabaseConnector" as DBC
 participant "user : User" as USER
 participant "<<metaclass>>\nDriverManager" as DRVRMNGR
 participant "c : Connection" as CONN
@@ -45,7 +45,7 @@ A -> CH ++ : run()
             ' omitted
         return Command.LOGIN
 
-        SES -> TMPUSER ** : <<create>>\nnew User()
+        SES -> U ** : <<create>>\nnew User()
 
         SES -> SES ++ : getBase64String({"LOGIN", "bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ==", "bVdlMWhfMTIzNA=="}, 1)
             SES -> TRANSM ++ : fromBase64Strig("bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ==")
@@ -53,8 +53,8 @@ A -> CH ++ : run()
             return "mirko.leon.weih@lgs-hu.eu"
         return "mirko.leon.weih@lgs-hu.eu"
 
-        SES -> TMPUSER ++ : withEmailAddress("mirko.leon.weih@lgs-hu.eu")
-        return tmpUser
+        SES -> U ++ : withEmailAddress("mirko.leon.weih@lgs-hu.eu")
+        return U
 
         SES -> SES ++ : getBase64String({"LOGIN", "bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ==", "bVdlMWhfMTIzNA=="}, 2)
             SES -> TRANSM ++ : fromBase64Strig("bVdlMWhfMTIzNA==")
@@ -62,10 +62,10 @@ A -> CH ++ : run()
             return "mWe1h_1234"
         return "mWe1h_1234"
 
-        SES -> TMPUSER ++ : withPassword("mWe1h_1234")
-        return tmpUser
+        SES -> U ++ : withPassword("mWe1h_1234")
+        return U
 
-        SES -> DBC ++ : login(tmpUser)
+        SES -> DBC ++ : login(u)
 
             DBC -> DRVRMNGR ++ : getConnection("jdbc:mysql://10.5.148.5:3306/Chat?user=chat&password=****")
                 ' omitted
@@ -77,7 +77,7 @@ A -> CH ++ : run()
                 CONN -> STMT ** : <<create>>\nnew Statement()
             return stmt
 
-            DBC -> TMPUSER ++ : getEmailAddress()
+            DBC -> U ++ : getEmailAddress()
             return "mirko.leon.weih@lgs-hu.eu"
 
             DBC -> STMT ++ : setString(1, "mirko.leon.weih@lgs-hu.eu")
@@ -148,7 +148,7 @@ A -> CH ++ : run()
         return "OK"
 
     return "OK"
-return
+' do not return here since this is a thread (?)
 
 @enduml
 
