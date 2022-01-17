@@ -58,7 +58,7 @@ public class DatabaseConnector {
 	}
 
 	private void debugLog(User user, String action, TransmittableObject o, Channel c) {
-		SimpleLogger.logf(LogLevel.DEBUG, "user (%s):(%s) : %s [%s] ", user, action, o);
+		SimpleLogger.logf(LogLevel.DEBUG, "user (%s):(%s) : %s [%s] ", user, c, action, o);
 	}
 
 	private void debugLog(User user, String action, TransmittableObject o) {
