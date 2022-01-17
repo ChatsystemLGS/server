@@ -1,6 +1,15 @@
 # Server for our Chatservice
 
-![UML-Diagram](./diagrams/uml.svg)
+## Klassendiagramm
+
+![UML-Klassendiagram](./diagrams/uml.svg)
+
+## Sequenzdiagramm
+
+* verbindung ist bereits aufgebaut
+* client sendet Anfrage für Login mit E-Mail-Addresse `mirko.leon.weih@lgs-hu.eu` und Passwort `mWe1h_1234` 
+
+![UML-Sequenziagram](./diagrams/sequence.svg)
 
 ## Protokoll
 

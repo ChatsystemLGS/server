@@ -54,6 +54,7 @@ A -> CH ++ : run()
         return "mirko.leon.weih@lgs-hu.eu"
 
         SES -> U ++ : withEmailAddress("mirko.leon.weih@lgs-hu.eu")
+            ' omitted
         return U
 
         SES -> SES ++ : getBase64String({"LOGIN", "bWlya28ubGVvbi53ZWloQGxncy1odS5ldQ==", "bVdlMWhfMTIzNA=="}, 2)
@@ -63,7 +64,9 @@ A -> CH ++ : run()
         return "mWe1h_1234"
 
         SES -> U ++ : withPassword("mWe1h_1234")
-        return U
+            U -> U ++ : hashPassword("mWe1h_1234")
+            return "JVdBXq9C/OA1VarLl7I396Rh9uEb3p+aQHlkVOBPVOpFBQ72ZJQdwJhyQp2Wi2cN8egXLBy2s0jnKiXMrXHd3Q=="
+        return
 
         SES -> DBC ++ : login(u)
 
