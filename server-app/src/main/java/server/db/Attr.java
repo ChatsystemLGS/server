@@ -1,5 +1,7 @@
 package server.db;
 
+import java.sql.Timestamp;
+
 import server.TransmittableObject;
 
 public class Attr<T> {
@@ -55,7 +57,10 @@ public class Attr<T> {
 		if (value instanceof byte[]) {
 			return TransmittableObject.toBase64String((byte[]) value);
 		}
-		
+
+		if (value instanceof Timestamp)
+			return Long.toString(((Timestamp) value).getTime());
+
 		return value.toString();
 	}
 
