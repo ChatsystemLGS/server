@@ -52,6 +52,10 @@ public class Attr<T> {
 			return TransmittableObject.toBase64String(((String) value).getBytes());
 		}
 
+		if (value instanceof byte[]) {
+			return TransmittableObject.toBase64String((byte[]) value);
+		}
+		
 		return value.toString();
 	}
 
