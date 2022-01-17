@@ -412,8 +412,10 @@ public class DatabaseConnector {
 				PreparedStatement stmt = c.prepareStatement(
 						"SELECT m.author author, m.timestamp timestamp, m.data data, m.dataType dataType FROM Messages m "
 								+ "INNER JOIN Channels c ON c.id = m.channel "
-								+ "INNER JOIN channelMembers cm ON cm.channel = c.id WHERE cm.user = ?")) {
+								+ "INNER JOIN channelMembers cm ON cm.channel = c.id WHERE cm.user = ? AND c.id = ? ")) {
 			stmt.setInt(1, user.getId());
+			stmt.setInt(2, channel.getId());
+
 			ResultSet rs = stmt.executeQuery();
 
 			ArrayList<Message> messageList = new ArrayList<>();

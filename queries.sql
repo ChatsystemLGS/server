@@ -118,5 +118,5 @@ INSERT INTO channelMembers (
 SELECT m.author author, m.timestamp timestamp, m.data data, m.dataType dataType FROM Messages m
 INNER JOIN Channels c ON c.id = m.channel
 INNER JOIN channelMembers cm ON cm.channel = c.id
-WHERE cm.user = [userId]
+WHERE cm.user = [userId] AND c.id = [channelId]
 LIMIT [limit];
