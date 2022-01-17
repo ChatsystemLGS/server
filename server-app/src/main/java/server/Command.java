@@ -43,7 +43,6 @@ enum Command {
 		ArgType.INTEGER, 
 		ArgType.STRING_DATA,
 		ArgType.STRING_ENUM, 
-		ArgType.INTEGER_TIMESTAMP 
 	}),
 
 	CREATEDM(State.AUTHENTICATED, new ArgType[] { 
