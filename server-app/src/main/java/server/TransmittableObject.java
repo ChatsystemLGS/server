@@ -59,7 +59,7 @@ public interface TransmittableObject {
 			b.append(a[i].transmittableString());
 			if (i == iMax)
 				return b.append(']').toString();
-			b.append(", ");
+			b.append(",");
 		}
 	}
 	
