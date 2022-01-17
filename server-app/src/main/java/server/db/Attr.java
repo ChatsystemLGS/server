@@ -37,6 +37,9 @@ public class Attr<T> {
 		if (value == null)
 			return "null";
 
+		if (value instanceof byte[])
+			return TransmittableObject.toBase64String((byte[]) value);
+
 		return value.toString();
 	}
 
