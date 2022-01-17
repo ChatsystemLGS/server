@@ -53,7 +53,7 @@ public class DatabaseConnector {
 		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new EmailAlreadyRegisteredException();
 		}
-		
+
 		debugLog(user, "added user", user);
 	}
 
@@ -258,14 +258,13 @@ public class DatabaseConnector {
 
 	}
 
-	// TODO even if userA == userB we should return the user
 	public User getUserById(User userA, User userB) throws SQLException, UserNotFoundException {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
 						"SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u "
-								+ "INNER JOIN userRelationships ur ON ur.userB = u.id "
-								+ "WHERE ur.userA = ? AND u.id = ?")) {
+								+ "LEFT OUTER JOIN userRelationships ur ON ur.userB = u.id AND ur.userA = ? "
+								+ "WHERE u.id = ?")) {
 			stmt.setInt(1, userA.getId());
 			stmt.setInt(2, userB.getId());
 
@@ -277,21 +276,28 @@ public class DatabaseConnector {
 			int id = rs.getInt("id");
 			String nickname = rs.getString("nickname");
 			String note = rs.getString("note");
-			RelationshipType type = RelationshipType.valueOf(rs.getString("type"));
+
+			String typeString = rs.getString("type");
+
+			RelationshipType type;
+
+			if (typeString == null)
+				type = null;
+			else
+				type = RelationshipType.valueOf(rs.getString("type"));
 
 			return new User().withId(id).withNickname(nickname).withNote(note).withType(type);
 		}
 
 	}
 
-	// TODO even if userA == userB we should return the user
 	public User getUserByEmail(User userA, User userB) throws SQLException, UserNotFoundException {
 
 		try (Connection c = DriverManager.getConnection(connectionUrl);
 				PreparedStatement stmt = c.prepareStatement(
 						"SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u "
-								+ "INNER JOIN userRelationships ur ON ur.userB = u.id "
-								+ "WHERE ur.userA = ? AND u.emailAddress = ?")) {
+								+ "LEFT OUTER JOIN userRelationships ur ON ur.userB = u.id AND ur.userA = ? "
+								+ "WHERE u.emailAddress = ?")) {
 			stmt.setInt(1, userA.getId());
 			stmt.setString(2, userB.getEmailAddress());
 

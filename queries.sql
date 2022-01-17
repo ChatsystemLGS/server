@@ -57,13 +57,13 @@ WHERE cm.channel = [channelId];
 
 -- getUserById
 SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u
-INNER JOIN  userRelationships ur ON ur.userB = u.id
-WHERE ur.userA = [userA] AND u.id = [userB];
+LEFT OUTER JOIN userRelationships ur ON ur.userB = u.id AND ur.userA = [userA]
+WHERE u.id = [userB];
 
 -- getUserByEmail
 SELECT u.id id, u.nickname nickname, ur.note note, ur.type type FROM Users u
-INNER JOIN  userRelationships ur ON ur.userB = u.id
-WHERE ur.userA = [userA] AND u.emailAddress = [userB];
+LEFT OUTER JOIN userRelationships ur ON ur.userB = u.id AND ur.userA = [userA]
+WHERE u.emailAddress = [userB];
 
 -- addFriend
 INSERT INTO userRelationships (
