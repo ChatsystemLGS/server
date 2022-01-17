@@ -112,7 +112,7 @@ public class Session {
 							.withPassword(getBase64String(args, 2)));
 					state = State.AUTHENTICATED;
 
-					yield response();
+					yield response(Status.OK, user.getId());
 
 				}
 				case QUIT -> {
@@ -220,7 +220,7 @@ public class Session {
 
 		return s;
 	}
-	
+
 	private String response(ProtocolException e) {
 		return e.transmittableString();
 	}
