@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import server.config.Config;
+import server.config.Config.ParameterParseException;
 import server.simplelogger.ConsoleLogger;
 import server.simplelogger.FileLogger;
 import server.simplelogger.FileLogger.LogType;
@@ -30,8 +31,15 @@ public class App {
 			e.printStackTrace();
 		}
 
-		new App(Config.createFromArgs(args, Config.DEFAULT_CONFIG));
+		Config cfg;
 
+		try {
+			cfg = Config.createFromArgs(args, Config.DEFAULT_CONFIG);
+			new App(cfg);
+		} catch (ParameterParseException e) {
+			System.out.println(Config.helpMessage(e.getMessage()));
+		}
+		
 	}
 
 	private App(Config cfg) {
