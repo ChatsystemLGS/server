@@ -11,6 +11,21 @@
 
 ![UML-Sequenziagram](./diagrams/sequence.svg)
 
+## Usage
+
+* use `.\gradlew :server-app:run --args='[arguments]'` or `.\gradlew.bat :server-app:run --args='[arguments]'` to run with gradle
+
+```
+Usage: [optional parameters] -dbUser=DATABASE_USER -dbPassword=DATABASE_PASSWORD
+
+Options:
+    Parameter                    Default Value  Description
+    -port=PORT                   1465           Port the server should listen on
+    -dbHost=DATABASE_HOST        localhost      Hostname of the database the server should connect to
+    -dbPort=DATABASE_PORT        3306           Port of the database the server should connect to
+    -dbTable=DATABASE_TABLE      Chat           Table to be used by the server
+```
+
 ## Protokoll
 
 ### Designentscheidungen
