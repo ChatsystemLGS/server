@@ -276,15 +276,13 @@ public class DatabaseConnector {
 			int id = rs.getInt("id");
 			String nickname = rs.getString("nickname");
 			String note = rs.getString("note");
-
-			String typeString = rs.getString("type");
-
 			RelationshipType type;
-
+			
+			String typeString = rs.getString("type");
 			if (typeString == null)
 				type = null;
 			else
-				type = RelationshipType.valueOf(rs.getString("type"));
+				type = RelationshipType.valueOf(typeString);
 
 			return new User().withId(id).withNickname(nickname).withNote(note).withType(type);
 		}
@@ -309,7 +307,13 @@ public class DatabaseConnector {
 			int id = rs.getInt("id");
 			String nickname = rs.getString("nickname");
 			String note = rs.getString("note");
-			RelationshipType type = RelationshipType.valueOf(rs.getString("type"));
+			RelationshipType type;
+			
+			String typeString = rs.getString("type");
+			if (typeString == null)
+				type = null;
+			else
+				type = RelationshipType.valueOf(typeString);
 
 			return new User().withId(id).withNickname(nickname).withNote(note).withType(type);
 		}
