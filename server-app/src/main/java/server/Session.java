@@ -61,89 +61,117 @@ public class Session {
 
 				return switch (cmd) {
 				case ADDFRIEND -> {
-//					try {
-					server.DBC.addFriendById(user, new User().withId(getInt(args, 1)));
 
-//					} catch (InvalidParameterException e) {
-//						server.DBC.addFriendByEmail(user, new User().withEmailAddress(args[1]));
-//					}
+					int userId = getInt(args, 1);
+
+					server.DBC.addFriendById(this.user.getId(), userId);
+
 					yield response();
 				}
 				case GETCHANNELMEMBERS -> {
 
-					User[] users = server.DBC.getChannelMembers(user, new Channel().withId(getInt(args, 1)));
+					int channelId = getInt(args, 1);
+
+					User[] users = server.DBC.getChannelMembers(this.user.getId(), channelId);
 
 					yield response(users);
 				}
 				case GETCHANNELS -> {
-					Channel[] channels = server.DBC.getChannels(user);
+
+					Channel[] channels = server.DBC.getChannels(this.user.getId());
 
 					yield response(channels);
 				}
 				case GETFRIENDS -> {
-					User[] users = server.DBC.getFriends(user);
+
+					User[] users = server.DBC.getFriends(this.user.getId());
 
 					yield response(users);
 				}
 				case GETPUBLICGROUPS -> {
+
 					Channel[] channels = server.DBC.getPublicGroups();
 
 					yield response(channels);
 				}
 				case GETUSER -> {
+
 					User user;
+
 					try {
-						user = server.DBC.getUserById(this.user, new User().withId(getInt(args, 1)));
-					} catch (InvalidParameterException e) {
-						user = server.DBC.getUserByEmail(this.user,
-								new User().withEmailAddress(getBase64String(args, 1)));
+						int userId = getInt(args, 1);
+						user = server.DBC.getUserById(this.user.getId(), userId);
+					} catch (InvalidParameterException e) { // TODO could this catch an exception thrown by
+															// getUserById...?
+						String emailAddress = getBase64String(args, 1);
+						user = server.DBC.getUserByEmail(this.user.getId(), emailAddress);
 					}
 
 					yield response(user);
 				}
 				case JOINGROUP -> {
-					server.DBC.joinGroup(user, new Channel().withId(getInt(args, 1)));
+
+					int channelId = getInt(args, 1);
+
+					server.DBC.joinGroup(this.user.getId(), channelId);
 
 					yield response();
 
 				}
 				case LOGIN -> {
-					user = server.DBC.login(new User().withEmailAddress(getBase64String(args, 1))
-							.withPassword(getBase64String(args, 2)));
+
+					String emailAddress = getBase64String(args, 1);
+					String passwordHash = User.hashPassword(getBase64String(args, 2));
+
+					user = server.DBC.login(emailAddress, passwordHash);
+
 					state = State.AUTHENTICATED;
 
 					yield response(Status.OK, user.getId());
 
 				}
 				case QUIT -> {
+
 					state = State.DISCONNECTED;
 
 					yield response();
 				}
 				case RECEIVEMESSAGES -> {
 
-					Message[] messages = server.DBC.receiveMessages(user, new Channel().withId(getInt(args, 1)),
-							getTimestamp(args, 2), getTimestamp(args, 3));
+					int channelId = getInt(args, 1);
+					Timestamp tFrom = getTimestamp(args, 2);
+					Timestamp tUntil = getTimestamp(args, 3);
+
+					Message[] messages = server.DBC.receiveMessages(this.user.getId(), channelId, tFrom, tUntil);
 
 					yield response(messages);
 				}
 				case REGISTER -> {
-					server.DBC.addUser(new User().withEmailAddress(getBase64String(args, 1))
-							.withNickname(getBase64String(args, 2)).withPassword(getBase64String(args, 3)));
+
+					String emailAddress = getBase64String(args, 1);
+					String nickname = getBase64String(args, 2);
+					String passwordHash = User.hashPassword(getBase64String(args, 3));
+
+					server.DBC.addUser(emailAddress, nickname, passwordHash);
 
 					yield response();
 				}
 				case CREATEDM -> {
-					server.DBC.createDm(user, new User().withId(getInt(args, 1)));
+
+					int userId = getInt(args, 1);
+
+					server.DBC.createDm(this.user.getId(), userId);
 
 					yield response();
 				}
 				case SENDMESSAGE -> {
 
+					int channelId = getInt(args, 1);
+					byte[] data = getBase64Bytes(args, 2);
 					DataType dataType = getEnum(args, 3, DataType.class);
-					server.DBC.sendMessage(user, new Channel().withId(getInt(args, 1)),
-							new Message().withData(getBase64Bytes(args, 2)).withDataType(dataType)
-									.withTimestamp(Timestamp.from(Instant.now())));
+					Timestamp timestamp = Timestamp.from(Instant.now());
+
+					server.DBC.sendMessage(this.user.getId(), channelId, timestamp, data, dataType);
 
 					yield response();
 				}

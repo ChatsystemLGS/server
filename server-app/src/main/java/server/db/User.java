@@ -21,7 +21,7 @@ public class User implements TransmittableObject {
 	// check email valid format
 	// change hashing algorithm to bcrypt and add salt
 
-	private String hashPassword(String password) {
+	public static String hashPassword(String password) {
 		MessageDigest md = null;
 
 		try {
